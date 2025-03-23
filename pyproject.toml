@@ -1,0 +1,18 @@
+[project]
+name = "tagging"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "gradio>=5.16.1",
+    "huggingface-hub>=0.29.0",
+    "onnxruntime>=1.12.0",
+    "torch==2.6.0+cpu",
+    "torchvision==0.21.0+cpu",
+    "pillow>=9.0.0",
+]
+
+[tool.uv]
+extra-index-url = ["https://pypi.org/simple", "https://download.pytorch.org/whl/cpu"]
+index-strategy = "unsafe-best-match"
