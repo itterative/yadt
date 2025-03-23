@@ -2,8 +2,8 @@ from typing import Tuple, Dict
 
 from PIL import Image
 
-import tagger_camie
-import tagger_smilingwolf
+from yatd import tagger_camie
+from yatd import tagger_smilingwolf
 
 class Predictor:
     def __init__(self):

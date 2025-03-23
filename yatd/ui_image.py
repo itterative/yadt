@@ -1,16 +1,14 @@
-import os
 import gradio as gr
 
 from PIL import Image
-from tqdm import tqdm
 
-import tagger_shared
-import process_prediction
-import ui_utils
+from yatd import tagger_shared
+from yatd import process_prediction
+from yatd import ui_utils
 
 @ui_utils.gradio_error
-def predict_folder(
-        folder: str,
+def predict(
+        image: Image,
         model_repo: str,
         general_thresh: float,
         general_mcut_enabled: bool,
@@ -19,72 +17,27 @@ def predict_folder(
         replace_underscores: bool,
         trim_general_tag_dupes: bool,
         escape_brackets: bool,
-        overwrite_current_caption: bool,
 ):
+    assert image is not None, "No image selected"
+
     tagger_shared.predictor.load_model(model_repo)
 
-    files = os.listdir(folder)
-    files = list(filter(lambda f: not f.endswith('.txt') and not f.endswith('.npz'), files))
-
-    all_count = 0
-    all_rating = dict()
-    all_character_res = dict()
-    all_general_res = dict()
-
-    
-    for index, file in tqdm(list(enumerate(files))):
-        try:
-            image = Image.open(folder + '/' + file).convert("RGBA")
-        except Exception as e:
-            continue
-
-        sorted_general_strings, rating, general_res, character_res = \
-            process_prediction.post_process_prediction(
-                *tagger_shared.predictor.predict(image),
-                general_thresh, general_mcut_enabled, character_thresh, character_mcut_enabled,
-                replace_underscores, trim_general_tag_dupes, escape_brackets,
-            )
-
-        all_count += 1
-
-        for k in rating.keys():
-            all_rating[k] = all_rating.get(k, 0) + rating[k]
-
-        for k in character_res.keys():
-            all_character_res[k] = all_character_res.get(k, 0) + 1
-        
-        for k in general_res.keys():
-            all_general_res[k] = all_general_res.get(k, 0) + 1
-
-        caption_file = file[:file.rindex('.')] + '.txt'
-        caption_file_path = folder + '/' + caption_file
-
-        if not os.path.exists(caption_file_path) or overwrite_current_caption:
-            with open(folder + '/' + caption_file, 'w') as f:
-                f.write(sorted_general_strings)
-
-    for k in all_rating.keys():
-        all_rating[k] = all_rating[k] / all_count
-
-    for k in all_character_res.keys():
-        all_character_res[k] = all_character_res[k] / all_count
-    
-    for k in all_general_res.keys():
-        all_general_res[k] = all_general_res[k] / all_count
-
-    return all_rating, all_general_res, all_character_res
+    return process_prediction.post_process_prediction(
+        *tagger_shared.predictor.predict(image),
+        general_thresh, general_mcut_enabled, character_thresh, character_mcut_enabled,
+        replace_underscores, trim_general_tag_dupes, escape_brackets,
+    )
 
 
 def ui(args):
     with gr.Row():
         with gr.Column(variant="panel"):
-            folder = gr.Textbox(label="Select folder:")
+            image = gr.Image(type="pil", image_mode="RGBA", label="Input")
             model_repo = gr.Dropdown(
                 tagger_shared.dropdown_list,
                 value=tagger_shared.default_repo,
                 label="Model",
             )
-
             with gr.Row():
                 general_thresh = gr.Slider(
                     0,
@@ -114,11 +67,6 @@ def ui(args):
                     scale=1,
                 )
             with gr.Row():
-                overwrite_current_caption = gr.Checkbox(
-                    value=False,
-                    label="Overwrite existing captions",
-                    scale=1,
-                )
                 replace_underscores = gr.Checkbox(
                     value=True,
                     label="Replace underscores with spaces",
@@ -134,33 +82,30 @@ def ui(args):
                     label="Escape brackets (for webui)",
                     scale=1,
                 )
-
             with gr.Row():
                 clear = gr.ClearButton(
                     components=[
-                        folder,
+                        image,
                         model_repo,
                         general_thresh,
                         general_mcut_enabled,
                         character_thresh,
                         character_mcut_enabled,
-                        replace_underscores,
-                        trim_general_tag_dupes,
-                        escape_brackets,
-                        overwrite_current_caption,
                     ],
                     variant="secondary",
                     size="lg",
                 )
     
                 submit = gr.Button(value="Submit", variant="primary", size="lg")
-        
+                
         with gr.Column(variant="panel"):
+            sorted_general_strings = gr.Textbox(label="Output (string)")
             rating = gr.Label(label="Rating")
             character_res = gr.Label(label="Output (characters)")
             general_res = gr.Label(label="Output (tags)")
             clear.add(
                 [
+                    sorted_general_strings,
                     rating,
                     character_res,
                     general_res,
@@ -168,9 +113,9 @@ def ui(args):
             )
 
     submit.click(
-        predict_folder,
+        predict,
         inputs=[
-            folder,
+            image,
             model_repo,
             general_thresh,
             general_mcut_enabled,
@@ -179,7 +124,6 @@ def ui(args):
             replace_underscores,
             trim_general_tag_dupes,
             escape_brackets,
-            overwrite_current_caption,
         ],
-        outputs=[rating, general_res, character_res],
+        outputs=[sorted_general_strings, rating, general_res, character_res],
     )

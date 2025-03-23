@@ -2,7 +2,7 @@ class _db:
     def __init__(self):
         import pathlib
 
-        self.path = pathlib.Path(__file__).parent / 'dataset.db'
+        self.path = pathlib.Path(__file__).parent.parent / 'dataset.db'
 
         self._setup_migrations()
         self._do_migrations()
