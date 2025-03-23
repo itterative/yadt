@@ -2,7 +2,7 @@ import argparse
 
 import gradio as gr
 
-TITLE = "Booru Tagger"
+TITLE = "Yet Another Dataset Tagger"
 DESCRIPTION = """
 <center>models are 90% data, 10% training</center>
 """
