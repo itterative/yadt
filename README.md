@@ -13,3 +13,7 @@ Afterwards, simply run `uv run main.py` in order to start the UI.
 You can also use Python's built-in virtual environments to run the project. Run `python3 -m venv .venv` to create your environment, then activate it using `. .venv/bin/activate`. To install the dependencies, you need to run `pip install -r requirements-cpu.txt`.
 
 Afterwards, run `python3 main.py` to start the UI.
+
+
+## Preview
+![preview of dataset tab](docs/yatd_dataset_tab_preview.jpeg)
