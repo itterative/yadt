@@ -15,11 +15,11 @@ class Predictor:
             return
         
         if model_repo.startswith(tagger_smilingwolf.MODEL_REPO_PREFIX):
-            from tagger_smilingwolf import Predictor
+            from yatd.tagger_smilingwolf import Predictor
             self.model = Predictor()
             self.model.load_model(model_repo)
         elif model_repo.startswith(tagger_camie.MODEL_REPO_PREFIX):
-            from tagger_camie import Predictor
+            from yatd.tagger_camie import Predictor
             self.model = Predictor()
             self.model.load_model(model_repo)
         else:

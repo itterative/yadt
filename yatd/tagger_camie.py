@@ -44,7 +44,7 @@ class Predictor:
         full_model = model_repo == CAMIE_MODEL_FULL
         metadata_path, model_info_path, state_dict_path = self.download_model(full_model)
 
-        from tagger_camie_model import load_model
+        from yatd.tagger_camie_model import load_model
 
         self.model, _, _ = load_model(
             '.',
