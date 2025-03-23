@@ -70,7 +70,7 @@ def process_dataset_folder(
 
             tagger_shared.predictor.load_model(model_repo)
             rating, general_res, character_res = tagger_shared.predictor.predict(image)
-            db.set_dataset_cache(file_hash, model_repo, encode_results(rating, general_res, character_res))
+            db.set_dataset_cache(file_hash, model_repo, folder, encode_results(rating, general_res, character_res))
 
         sorted_general_strings, rating, general_res, character_res = \
             process_prediction.post_process_prediction(
