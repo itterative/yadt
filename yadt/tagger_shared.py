@@ -2,8 +2,8 @@ from typing import Tuple, Dict
 
 from PIL import Image
 
-from yatd import tagger_camie
-from yatd import tagger_smilingwolf
+from yadt import tagger_camie
+from yadt import tagger_smilingwolf
 
 class Predictor:
     def __init__(self):
@@ -15,11 +15,11 @@ class Predictor:
             return
         
         if model_repo.startswith(tagger_smilingwolf.MODEL_REPO_PREFIX):
-            from yatd.tagger_smilingwolf import Predictor
+            from yadt.tagger_smilingwolf import Predictor
             self.model = Predictor()
             self.model.load_model(model_repo)
         elif model_repo.startswith(tagger_camie.MODEL_REPO_PREFIX):
-            from yatd.tagger_camie import Predictor
+            from yadt.tagger_camie import Predictor
             self.model = Predictor()
             self.model.load_model(model_repo)
         else:

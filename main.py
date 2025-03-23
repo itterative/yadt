@@ -19,7 +19,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main():
-    from yatd import ui_image, ui_directory, ui_dataset, ui_misc
+    from yadt import ui_image, ui_directory, ui_dataset, ui_misc
 
     args = parse_args()
 

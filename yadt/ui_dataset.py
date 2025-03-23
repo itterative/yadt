@@ -4,9 +4,9 @@ import gradio as gr
 from PIL import Image
 from tqdm import tqdm
 
-from yatd import tagger_shared
-from yatd import process_prediction
-from yatd import ui_utils
+from yadt import tagger_shared
+from yadt import process_prediction
+from yadt import ui_utils
 
 @ui_utils.gradio_error
 def process_dataset_folder(
@@ -28,7 +28,7 @@ def process_dataset_folder(
     import zlib
     import pickle
 
-    from yatd.dataset_db import db
+    from yadt.dataset_db import db
     
     def hash_file(path: str):
         import hashlib
@@ -117,7 +117,7 @@ def process_dataset_folder(
 def load_dataset_settings(args):
     @ui_utils.gradio_error
     def _load_dataset_settings(folder: str):
-        from yatd.dataset_db import db
+        from yadt.dataset_db import db
 
         model_repo = str(db.get_dataset_setting(folder, 'model_repo', default=tagger_shared.default_repo))
         general_thresh = float(db.get_dataset_setting(folder, 'general_thresh', default=args.score_general_threshold))
@@ -169,7 +169,7 @@ def save_dataset_settings(args):
             ban_tags: str,
             map_tags: str,
     ):
-        from yatd.dataset_db import db
+        from yadt.dataset_db import db
 
         db.set_dataset_setting(folder, 'model_repo', str(model_repo))
         db.set_dataset_setting(folder, 'general_thresh', str(general_thresh))

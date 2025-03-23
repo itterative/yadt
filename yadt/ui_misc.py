@@ -1,7 +1,7 @@
 import gradio as gr
 
-from yatd import ui_utils
-from yatd.dataset_db import db
+from yadt import ui_utils
+from yadt.dataset_db import db
 
 
 def database_size():
