@@ -2,7 +2,6 @@ import os
 import gradio as gr
 
 from PIL import Image
-from tqdm import tqdm
 
 from yadt import tagger_shared
 from yadt import process_prediction
@@ -20,6 +19,7 @@ def predict_folder(
         trim_general_tag_dupes: bool,
         escape_brackets: bool,
         overwrite_current_caption: bool,
+        progress = gr.Progress(),
 ):
     tagger_shared.predictor.load_model(model_repo)
 
@@ -32,7 +32,7 @@ def predict_folder(
     all_general_res = dict()
 
     
-    for index, file in tqdm(list(enumerate(files))):
+    for index, file in progress.tqdm(list(enumerate(files))):
         try:
             image = Image.open(folder + '/' + file).convert("RGBA")
         except Exception as e:

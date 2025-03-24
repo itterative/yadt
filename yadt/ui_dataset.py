@@ -2,7 +2,6 @@ import os
 import gradio as gr
 
 from PIL import Image
-from tqdm import tqdm
 
 from yadt import tagger_shared
 from yadt import process_prediction
@@ -24,6 +23,7 @@ def process_dataset_folder(
         keep_tags: str,
         ban_tags: str,
         map_tags: str,
+        progress = gr.Progress(),
 ):
     import zlib
     import pickle
@@ -54,7 +54,7 @@ def process_dataset_folder(
     all_character_res = dict()
     all_general_res = dict()
 
-    for index, file in tqdm(list(enumerate(files))):
+    for index, file in progress.tqdm(list(enumerate(files))):
         image_path = folder + '/' + file
 
         file_hash = hash_file(image_path)
