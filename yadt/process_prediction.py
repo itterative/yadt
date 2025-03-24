@@ -71,7 +71,7 @@ def post_process_prediction(
         return tags_new
 
     def _generate_string(character_res: List[Tuple[str, float]], general_res: List[Tuple[str, float]]):
-        character_res = _trim_general_tag_dupes(character_res)
+        character_res = character_res
         general_res = list(map(lambda x: (x[0], x[1] - 1.0), general_res))
 
         # print('generate_string', character_res, general_res)
@@ -96,26 +96,49 @@ def post_process_prediction(
         if not trim_general_tag_dupes:
             return tags
 
-        def matches_tag(tag, s):
-            tag = tag.split()
-            s = s.split()
-            len_tag = len(tag)
-            return any(tag == s[i:len_tag+i] for i in range(len(s)-len_tag+1))
+        def matches_tag(search_tag):
+            # returns True if the search_tag's words are included in tag's words
+            #   example: 'A B' & 'A' -> True
+            #   example: 'Aa B' & 'A' -> False
+            #   example: 'A B C' & 'B C' -> True
+            #   example: 'A B Cc' & 'B C' -> False
+
+            search_tag = search_tag[0]
+
+            def _matches_tag(tag):
+                tag = tag[0]
+
+                if tag == search_tag:
+                    return False
+
+                search_tag_words = search_tag.split()
+                tag_words = tag.split()
+                len_tag_words = len(tag_words)
+
+                for i in range(len(search_tag_words)-len_tag_words+1):
+                    if tag_words == search_tag_words[i:len_tag_words+i]:
+                        return True
+
+                return False
+
+            return _matches_tag
         
-        tags_new = list(sorted(tags, key=lambda x: x[1], reverse=True))
+        tags_new = list(tags)
 
         removed = True
         while removed:
             removed = False
             for i in range(len(tags_new)):
                 tag = tags_new[i]
-                found = next(filter(lambda s: s[0] != tag and matches_tag(tag[0], s[0]), tags_new), None)
+                found_tags = list(filter(matches_tag(tag), tags_new))
 
-                if found is None:
+                if len(found_tags) == 0:
                     continue
 
-                found = True
-                tags_new.remove(tag)
+                for found_tag in found_tags:
+                    tags_new.remove(found_tag)
+                    break
+
                 removed = True
                 break
 
@@ -247,8 +270,30 @@ def post_process_prediction(
     # print('character_res', len(character_res.items()), len(_replace_underscore(_threshold(character_res.items(), character_thresh, character_mcut_enabled))))
     # print('general_res', len(general_res.items()), len(_replace_underscore(_threshold(general_res.items(), general_thresh, general_mcut_enabled))))
 
-    character_res = _replace_underscore(_threshold(character_res.items(), character_thresh, character_mcut_enabled))
-    general_res = _replace_underscore(_threshold(general_res.items(), general_thresh, general_mcut_enabled))
-    rating = _clean_ratings(rating.items())
+    
+    character_res = _replace_underscore(character_res.items())
+    general_res = _replace_underscore(general_res.items())
 
-    return _generate_string(character_res, general_res), dict(rating), dict(general_res), dict(character_res)
+    character_tags = set([ k for k, _ in character_res ])
+    general_tags = set([ k for k, _ in general_res ])
+
+    character_res = _threshold(character_res, character_thresh, character_mcut_enabled)
+    general_res = _trim_general_tag_dupes(_threshold(general_res, general_thresh, general_mcut_enabled))
+
+    tag_string = _generate_string(character_res, general_res)
+
+    rating = _clean_ratings(rating.items())
+    
+    # recreate results to match the changes
+
+    tag_res = list(character_res) + list(general_res)
+    tag_res = sorted(tag_res, key=lambda x: x[1], reverse=True)
+    tag_res = _map_tokens(tag_res)
+    tag_res = _ban_tokens(tag_res)
+    tag_res = _replace_underscore(tag_res)
+    tag_res = sorted(tag_res, key=lambda x: x[1], reverse=True)
+
+    character_res = [ (k, v) for k, v in tag_res if k in character_tags ]
+    general_res = [ (k, v) for k, v in tag_res if k in general_tags ]
+
+    return tag_string, dict(rating), dict(general_res), dict(character_res)
