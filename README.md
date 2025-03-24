@@ -16,4 +16,4 @@ Afterwards, run `python3 main.py` to start the UI.
 
 
 ## Preview
-![preview of dataset tab](docs/yatd_dataset_tab_preview.jpeg)
+![preview of dataset tab](docs/yadt_dataset_tab_preview.jpeg)
