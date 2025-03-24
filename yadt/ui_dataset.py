@@ -50,6 +50,7 @@ def process_dataset_folder(
     files = list(filter(lambda f: not f.endswith('.txt') and not f.endswith('.npz') and not f.endswith('.json'), files))
 
     all_count = 0
+    all_images = []
     all_rating = dict()
     all_character_res = dict()
     all_general_res = dict()
@@ -60,14 +61,14 @@ def process_dataset_folder(
         file_hash = hash_file(image_path)
         cache = db.get_dataset_cache(file_hash, model_repo)
 
+        try:
+            image = Image.open(image_path).convert("RGBA")
+        except Exception as e:
+            continue
+
         if cache is not None:
             rating, general_res, character_res = decode_results(cache)
         else:
-            try:
-                image = Image.open(image_path).convert("RGBA")
-            except Exception as e:
-                continue
-
             tagger_shared.predictor.load_model(model_repo)
             rating, general_res, character_res = tagger_shared.predictor.predict(image)
             db.set_dataset_cache(file_hash, model_repo, folder, encode_results(rating, general_res, character_res))
@@ -86,6 +87,8 @@ def process_dataset_folder(
         # print('')
         
         all_count += 1
+
+        all_images.append((image, sorted_general_strings))
 
         for k in rating.keys():
             all_rating[k] = all_rating.get(k, 0) + rating[k]
@@ -112,7 +115,13 @@ def process_dataset_folder(
     for k in all_general_res.keys():
         all_general_res[k] = all_general_res[k] / all_count
 
-    return all_rating, all_general_res, all_character_res
+    return [
+        all_images,
+        all_rating,
+        all_general_res,
+        all_character_res,
+    ]
+
 
 def load_dataset_settings(args):
     @ui_utils.gradio_error
@@ -283,17 +292,36 @@ def ui(args):
     
                 submit = gr.Button(value="Submit", variant="primary", size="lg")
 
-        with gr.Column(variant="panel"):
-            rating = gr.Label(label="Rating")
-            character_res = gr.Label(label="Output (characters)")
-            general_res = gr.Label(label="Output (tags)")
-            clear.add(
-                [
-                    rating,
-                    character_res,
-                    general_res,
-                ]
-            )
+        with gr.Column():
+            with gr.Column(variant="panel"):
+                gallery = gr.Gallery(interactive=False, columns=4)
+                gallery_tags = gr.Text(lines=4, interactive=False, show_label=False, container=False, placeholder="Select an image to view the resulting tags.")
+
+                def on_gallery_select(event: gr.SelectData):
+                    return event.value['caption']
+
+                gallery.select(
+                    on_gallery_select,
+                    outputs=gallery_tags,
+                )
+
+                gallery.preview_close(
+                    lambda *args: None,
+                    outputs=gallery_tags,
+                )
+
+            with gr.Column(variant="panel"):
+                rating = gr.Label(label="Rating")
+                character_res = gr.Label(label="Output (characters)")
+                general_res = gr.Label(label="Output (tags)")
+
+                clear.add(
+                    [
+                        rating,
+                        character_res,
+                        general_res,
+                    ]
+                )
 
 
     submit.click(
@@ -314,7 +342,12 @@ def ui(args):
             ban_tags,
             map_tags,
         ],
-        outputs=[rating, general_res, character_res],
+        outputs=[
+            gallery,
+            rating,
+            general_res,
+            character_res,
+        ],
     )
 
     dataset_settings = [
