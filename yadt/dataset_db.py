@@ -188,7 +188,7 @@ class _db:
             cursor = conn.cursor()
 
             try:
-                cursor.execute('delete from dataset_cache where (select count() from dataset_cache_stats s left join dataset_stats d on d.id = s.dataset_id where d.dataset = ? and dataset_cache.id = s.hash_id) == 1', (dataset,))
+                cursor.execute('delete from dataset_cache where id in (select s.hash_id from dataset_cache_stats s left join dataset_stats d on d.id = s.dataset_id group by s.hash_id having s.hash_id in (select s2.hash_id from dataset_cache_stats s2 left join dataset_stats d2 on d2.id = s2.dataset_id where d2.dataset = ?) and count(distinct s.dataset_id) = 1)', (dataset,))
                 cursor.execute('delete from dataset_stats where dataset = ?', (dataset,))
 
                 conn.commit()
