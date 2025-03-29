@@ -1,19 +1,24 @@
-import threading
-
 class _db:
     def __init__(self):
         import pathlib
+        import threading
 
         self.path = pathlib.Path(__file__).parent.parent / 'dataset.db'
         self._db_lock = threading.Lock()
 
-        self._setup_migrations()
-        self._do_migrations()
-
-    def _conn(self):
-        import sqlite3
-
         with self._db_lock:
+            self._setup_migrations()
+            self._do_migrations()
+
+    def _conn(self, locked: bool = True):
+        import sqlite3
+        import contextlib
+
+        lock = self._db_lock
+        if not locked:
+            lock = contextlib.nullcontext()
+
+        with lock:
             conn = sqlite3.connect(self.path)
 
             conn.execute('pragma busy_timeout = 10000')
@@ -25,7 +30,7 @@ class _db:
     def _setup_migrations(self):
         import sqlite3
 
-        with self._conn() as conn:
+        with self._conn(locked=False) as conn:
             cursor = conn.cursor()
 
             try:
@@ -40,7 +45,7 @@ class _db:
     def _do_migration(self, name: str, script: str):
         import sqlite3
 
-        with self._conn() as conn:
+        with self._conn(locked=False) as conn:
             cursor = conn.cursor()
 
             try:
@@ -255,8 +260,8 @@ class _db:
         with self._db_lock:
             os.unlink(self.path)
 
-        self._setup_migrations()
-        self._do_migrations()
+            self._setup_migrations()
+            self._do_migrations()
 
 
 db = _db()
