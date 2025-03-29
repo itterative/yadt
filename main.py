@@ -20,7 +20,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main():
-    from yadt import ui_image, ui_directory, ui_dataset, ui_misc
+    from yadt import ui_image, ui_dataset, ui_misc
 
     args = parse_args()
 
@@ -43,9 +43,6 @@ def main():
             with gr.Tabs():
                 with gr.Tab(label="Image"):
                     ui_image.ui(args)
-
-                with gr.Tab(label="Directory"):
-                    ui_directory.ui(args)
 
                 with gr.Tab(label="Dataset"):
                     ui_dataset.ui(args)
