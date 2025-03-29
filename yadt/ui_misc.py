@@ -15,20 +15,28 @@ def database_size():
     return f'<h3>Dataset DB ({ui_utils.human_readable_bytes(dataset_db_size)})</h3>'
 
 def dataset_cache_for_repo_name():
-    return [ui_utils.NO_DROPDOWN_SELECTION] + db.get_dataset_cache_for_repo_name()
+    return sorted(
+        [ui_utils.NO_DROPDOWN_SELECTION] + db.get_dataset_cache_for_repo_name(),
+        key=ui_utils.natural_sort,
+    )
 
 def dataset_cache_usage_for_repo_name():
-    return [
-        [row['repo_name'], ui_utils.human_readable_bytes(row['bytes'])] for row in db.get_dataset_cache_usage_for_repo_name()
-    ]
+    return sorted(
+        [ [row['repo_name'], ui_utils.human_readable_bytes(row['bytes'])] for row in db.get_dataset_cache_usage_for_repo_name() ],
+        key=lambda r: ui_utils.natural_sort(r[0]),
+    )
 
 def dataset_cache_for_dataset():
-    return [ui_utils.NO_DROPDOWN_SELECTION] + [ row or 'UNKNOWN' for row in db.get_dataset_cache_for_dataset() ]
+    return sorted(
+        [ui_utils.NO_DROPDOWN_SELECTION] + [ row or 'UNKNOWN' for row in db.get_dataset_cache_for_dataset() ],
+        key=ui_utils.natural_sort,
+    )
 
 def dataset_cache_usage_for_dataset():
-    return [
-        [row['dataset'] or 'UNKNOWN', ui_utils.human_readable_bytes(row['bytes'])] for row in db.get_dataset_cache_usage_for_dataset()
-    ]
+    return sorted(
+        [ [row['dataset'] or 'UNKNOWN', ui_utils.human_readable_bytes(row['bytes'])] for row in db.get_dataset_cache_usage_for_dataset() ],
+        key=lambda r: ui_utils.natural_sort(r[0]),
+    )
 
 @ui_utils.gradio_error
 def vacuum_database():

@@ -1,3 +1,4 @@
+import re
 import gradio as gr
 
 NO_DROPDOWN_SELECTION = '(None)'
@@ -52,3 +53,6 @@ def human_readable_bytes(size: int, units = ['B', 'KiB', 'MiB', 'GiB', 'TiB']):
         size /= 1024
     else:
         return f'{size:.2f} {unit}'
+
+_RE_NUMERIC_ = re.compile('([0-9]+)')
+natural_sort = lambda key: [int(c) if c.isdigit() else c.lower() for c in _RE_NUMERIC_.split(key)]
