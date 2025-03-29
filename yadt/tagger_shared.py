@@ -4,6 +4,7 @@ from PIL import Image
 
 from yadt import tagger_camie
 from yadt import tagger_smilingwolf
+from yadt import tagger_florence2_promptgen
 
 class Predictor:
     def __init__(self):
@@ -20,6 +21,10 @@ class Predictor:
             self.model.load_model(model_repo)
         elif model_repo.startswith(tagger_camie.MODEL_REPO_PREFIX):
             from yadt.tagger_camie import Predictor
+            self.model = Predictor()
+            self.model.load_model(model_repo)
+        elif model_repo.startswith(tagger_florence2_promptgen.MODEL_REPO_PREFIX):
+            from yadt.tagger_florence2_promptgen import Predictor
             self.model = Predictor()
             self.model.load_model(model_repo)
         else:
@@ -47,6 +52,8 @@ dropdown_list = [
     tagger_smilingwolf.CONV_MODEL_DSV2_REPO,
     tagger_smilingwolf.CONV2_MODEL_DSV2_REPO,
     tagger_smilingwolf.VIT_MODEL_DSV2_REPO,
+    tagger_florence2_promptgen.FLORENCE2_PROMPTGEN_LARGE,
+    tagger_florence2_promptgen.FLORENCE2_PROMPTGEN_BASE,
     tagger_camie.CAMIE_MODEL_FULL,
     tagger_camie.CAMIE_MODEL_INITIAL_ONLY,
 ]
