@@ -188,7 +188,7 @@ def process_dataset_gallery_filters(args):
                     all_image_dict[tag] = 1
 
         return gr.Dropdown(choices=[
-            tag for tag, _ in sorted(all_image_dict.items(), key=lambda item: item[1], reverse=True)
+            (f'{tag} [{count}]', tag) for tag, count in sorted(all_image_dict.items(), key=lambda item: item[1], reverse=True)
         ])
 
     return _process_dataset_gallery
