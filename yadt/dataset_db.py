@@ -109,6 +109,46 @@ class _db:
             create unique index idx_dataset_cache_stats_id on dataset_cache_stats (dataset_id, hash_id);
         """)
 
+        self._do_migration("dataset_history", """
+            create table if not exists dataset_history (
+                id integer primary key,
+                dataset_id integer not null,
+                foreign key (dataset_id) references dataset_stats (id) on delete cascade
+            );
+                           
+            create index idx_dataset_history_dataset_id on dataset_history (dataset_id);
+        """)
+
+    def get_recent_datasets(self) -> list[str]:
+        with self._conn() as conn:
+            cursor = conn.cursor()
+
+            rows = cursor.execute('select max(s.dataset) from dataset_stats s left join dataset_history h on s.id = h.dataset_id group by s.id order by max(h.id) desc, s.id desc limit 10').fetchall()
+            return [row[0] for row in rows]
+
+    def update_recent_datasets(self, last_dataset: str):
+        import sqlite3
+
+        with self._conn() as conn:
+            cursor = conn.cursor()
+
+            try:
+                try:
+                    rows = cursor.execute('insert or abort into dataset_stats (dataset) values (?) returning id', (last_dataset,)).fetchall()
+                    conn.commit()
+                except sqlite3.IntegrityError:
+                    rows = cursor.execute('select id from dataset_stats where dataset = ?', (last_dataset,)).fetchall()
+
+                dataset_id = int(rows[0][0])
+
+                cursor.execute('insert into dataset_history (dataset_id) values (?)', (dataset_id,))
+                cursor.execute('delete from dataset_history where id not in (select id from dataset_history order by id desc limit 10)')
+
+                conn.commit()
+            except sqlite3.Error as e:
+                conn.rollback()
+                raise Exception("failed to update dataset cache") from e
+
     def get_dataset_setting(self, dataset: str, key: str, default=None):
         with self._conn() as conn:
             cursor = conn.cursor()

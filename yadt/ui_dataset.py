@@ -55,7 +55,7 @@ def process_dataset_folder(
     all_character_res = dict()
     all_general_res = dict()
 
-    for index, file in progress.tqdm(list(enumerate(files))):
+    for index, file in progress.tqdm(list(enumerate(files)), desc=folder):
         image_path = folder + '/' + file
 
         file_hash = hash_file(image_path)
@@ -71,7 +71,8 @@ def process_dataset_folder(
         else:
             tagger_shared.predictor.load_model(model_repo)
             rating, general_res, character_res = tagger_shared.predictor.predict(image)
-            db.set_dataset_cache(file_hash, model_repo, folder, encode_results(rating, general_res, character_res))
+
+        db.set_dataset_cache(file_hash, model_repo, folder, encode_results(rating, general_res, character_res))
 
         sorted_general_strings, rating, general_res, character_res = \
             process_prediction.post_process_prediction(
@@ -115,7 +116,10 @@ def process_dataset_folder(
     for k in all_general_res.keys():
         all_general_res[k] = all_general_res[k] / all_count
 
+    db.update_recent_datasets(folder)
+
     return [
+        gr.Dropdown(choices=load_recent_datasets()),
         all_images,
         all_rating,
         all_general_res,
@@ -196,11 +200,23 @@ def save_dataset_settings(args):
 
     return _save_dataset_settings
 
+@ui_utils.gradio_error
+def load_recent_datasets():
+    from yadt.dataset_db import db
+    return db.get_recent_datasets()
+
 def ui(args):
     with gr.Row():
         with gr.Column(variant="panel"):
             with gr.Row(equal_height=True):
-                folder = gr.Textbox(label="Select folder:", scale=1)
+                # folder = gr.Textbox(label="Select folder:", scale=1)
+                folder = gr.Dropdown(
+                    label="Select folder:",
+                    choices=load_recent_datasets(),
+                    allow_custom_value=True,
+                    scale=1,
+                )
+
                 load_folder = gr.Button(value="Load", variant="primary", scale=0)
 
             gr.HTML('<p style="margin-top: -1em"><i>Dataset settings are saved on submit. Use the load button to reload them.</i></p>')
@@ -343,6 +359,7 @@ def ui(args):
             map_tags,
         ],
         outputs=[
+            folder,
             gallery,
             rating,
             general_res,
@@ -366,10 +383,21 @@ def ui(args):
         map_tags,
     ]
 
+    folder.select(
+        load_dataset_settings(args),
+        inputs=[folder],
+        outputs=dataset_settings,
+    )
+
     load_folder.click(
         load_dataset_settings(args),
         inputs=[folder],
         outputs=dataset_settings,
+    )
+
+    load_folder.click(
+        lambda: gr.Dropdown(choices=load_recent_datasets()),
+        outputs=folder,
     )
 
     submit.click(
