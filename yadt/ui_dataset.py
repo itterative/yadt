@@ -301,6 +301,66 @@ def save_dataset_settings(args):
     return _save_dataset_settings
 
 
+def on_gallery_select(selection: tuple[str, str], all_images: list[tuple[str, tuple[str, str, str]]], event: gr.SelectData):
+    _selection = event.value['caption']
+    caption = next(filter(lambda image: image[0] == _selection, all_images), [None, [None, None, None]])[1][2]
+
+    assert caption is not None, f"Could not find caption for the selected image: {_selection}"
+
+    return [
+        gr.Text(value=caption, interactive=True),
+        gr.Column(visible=True),
+        [selection[0], _selection],
+    ]
+
+def on_gallery_deselect(selection: tuple[str, str]):
+    return [
+        gr.Text(value=None, interactive=False),
+        gr.Column(visible=False),
+        [selection[0], None],
+    ]
+
+def on_gallery_reset(selection: tuple[str, str], all_images: list[tuple[str, tuple[str, str, str]]]):
+    if selection[1] is None:
+        return None
+
+    selection = selection[1]
+    return next(filter(lambda image: image[0] == selection, all_images), [None, [None, None, None]])[1][1]
+
+def on_gallery_reload(selection: tuple[str, str], all_images: list[tuple[str, tuple[str, str, str]]]):
+    if selection[1] is None:
+        return None
+
+    selection = selection[1]
+    return next(filter(lambda image: image[0] == selection, all_images), [None, [None, None, None]])[1][2]
+
+@ui_utils.gradio_warning
+def on_gallery_save(selection: tuple[str, str], all_images: list[tuple[str, tuple[str, str, str]]], caption: str):
+    from yadt.dataset_db import db
+
+    assert len(selection) > 0, "No gallery image selected"
+
+    folder, selection = selection
+    gallery_item = next(filter(lambda image: image[0] == selection, all_images), [None, [None, None, None]])
+
+    assert gallery_item[0] is not None, f"Could not find selected image: {selection}"
+
+    file_hash_hex = gallery_item[0]
+    file_hash = bytes.fromhex(file_hash_hex)
+    image_path, initial_edit, _ = gallery_item[1]
+
+    save_caption_for_image_path(image_path, caption, overwrite_current_caption=True)
+    db.set_dataset_edit(folder, file_hash, initial_edit, caption)
+
+    try:
+        all_images_i = list(map(lambda i: i[0], all_images)).index(file_hash_hex)
+        all_images[all_images_i] = [file_hash_hex, [image_path, initial_edit, caption]]
+    except ValueError:
+        gr.Warning(f'Could not update caption for selected image: {selection}')
+
+    return all_images
+
+
 def ui(args):
     with gr.Blocks() as page:
         with gr.Row():
@@ -487,65 +547,6 @@ def ui(args):
         inputs=[gallery_cache, gallery_tags_filter_dropdown],
         outputs=[gallery],
     )
-
-    def on_gallery_select(selection: tuple[str, str], all_images: list[tuple[str, tuple[str, str, str]]], event: gr.SelectData):
-        _selection = event.value['caption']
-        caption = next(filter(lambda image: image[0] == _selection, all_images), [None, [None, None, None]])[1][2]
-
-        assert caption is not None, f"Could not find caption for the selected image: {_selection}"
-
-        return [
-            gr.Text(value=caption, interactive=True),
-            gr.Column(visible=True),
-            [selection[0], _selection],
-        ]
-
-    def on_gallery_deselect(selection: tuple[str, str]):
-        return [
-            gr.Text(value=None, interactive=False),
-            gr.Column(visible=False),
-            [selection[0], None],
-        ]
-    
-    def on_gallery_reset(selection: tuple[str, str], all_images: list[tuple[str, tuple[str, str, str]]]):
-        if selection[1] is None:
-            return None
-
-        selection = selection[1]
-        return next(filter(lambda image: image[0] == selection, all_images), [None, [None, None, None]])[1][1]
-    
-    def on_gallery_reload(selection: tuple[str, str], all_images: list[tuple[str, tuple[str, str, str]]]):
-        if selection[1] is None:
-            return None
-
-        selection = selection[1]
-        return next(filter(lambda image: image[0] == selection, all_images), [None, [None, None, None]])[1][2]
-
-    @ui_utils.gradio_warning
-    def on_gallery_save(selection: tuple[str, str], all_images: list[tuple[str, tuple[str, str, str]]], caption: str):
-        from yadt.dataset_db import db
-
-        assert len(selection) > 0, "No gallery image selected"
-
-        folder, selection = selection
-        gallery_item = next(filter(lambda image: image[0] == selection, all_images), [None, [None, None, None]])
-
-        assert gallery_item[0] is not None, f"Could not find selected image: {selection}"
-
-        file_hash_hex = gallery_item[0]
-        file_hash = bytes.fromhex(file_hash_hex)
-        image_path, initial_edit, _ = gallery_item[1]
-
-        save_caption_for_image_path(image_path, caption, overwrite_current_caption=True)
-        db.set_dataset_edit(folder, file_hash, initial_edit, caption)
-
-        try:
-            all_images_i = list(map(lambda i: i[0], all_images)).index(file_hash_hex)
-            all_images[all_images_i] = [file_hash_hex, [image_path, initial_edit, caption]]
-        except ValueError:
-            gr.Warning(f'Could not update caption for selected image: {selection}')
-
-        return all_images
 
     gallery.select(
         on_gallery_select,
