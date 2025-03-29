@@ -85,7 +85,7 @@ class Predictor:
         # image.thumbnail((new_width, new_height), Image.Resampling.LANCZOS)
 
         canvas = Image.new("RGBA", image.size, (255, 255, 255))
-        canvas.alpha_composite(image)
+        canvas.alpha_composite(image.convert("RGBA"))
         image = canvas.convert("RGB")
 
         # Pad image to square
