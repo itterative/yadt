@@ -1,18 +1,103 @@
 [project]
-name = "tagging"
+name = "yadt"
 version = "0.1.0"
-description = "Add your description here"
+description = "Yet Another Dataset Tagger"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "gradio>=5.16.1",
     "huggingface-hub>=0.29.0",
+    "pillow>=9.0.0"
+]
+
+[project.optional-dependencies]
+cpu = [
     "onnxruntime>=1.12.0",
     "torch==2.6.0+cpu",
     "torchvision==0.21.0+cpu",
-    "pillow>=9.0.0",
+    "transformers>=4.38.0",
+    "timm==1.0.15",
+    "einops>=0.8.1"
+]
+
+cuda118 = [
+    "onnxruntime-gpu>=1.12.0",
+    "torch==2.6.0",
+    "torchvision==0.21.0",
+    "transformers>=4.38.0",
+    "timm==1.0.15",
+    "einops>=0.8.1"
+]
+
+cuda124 = [
+    "onnxruntime-gpu>=1.12.0",
+    "torch==2.6.0",
+    "torchvision==0.21.0",
+    "transformers>=4.38.0",
+    "timm==1.0.15",
+    "einops>=0.8.1"
+]
+
+rocm = [
+    "onnxruntime-gpu>=1.12.0",
+    "pytorch-triton-rocm==3.2.0",
+    "torch==2.6.0",
+    "torchvision==0.21.0",
+    "transformers>=4.38.0",
+    "timm==1.0.15",
+    "einops>=0.8.1"
 ]
 
 [tool.uv]
-extra-index-url = ["https://pypi.org/simple", "https://download.pytorch.org/whl/cpu"]
 index-strategy = "unsafe-best-match"
+conflicts = [
+    [
+        { extra = "cpu" },
+        { extra = "cuda118" },
+        { extra = "cuda124" },
+        { extra = "rocm" }
+    ]
+]
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", extra = "cpu" },
+    { index = "pytorch-cuda118", extra = "cuda118" },
+    { index = "pytorch-cuda124", extra = "cuda124" },
+    { index = "pytorch-rocm", extra = "rocm" }
+]
+
+torchvision = [
+    { index = "pytorch-cpu", extra = "cpu" },
+    { index = "pytorch-cuda118", extra = "cuda118" },
+    { index = "pytorch-cuda124", extra = "cuda124" },
+    { index = "pytorch-rocm", extra = "rocm" }
+]
+
+pytorch-triton-rocm = [
+    { index = "pytorch-rocm", extra = "rocm" }
+]
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cuda118"
+url = "https://download.pytorch.org/whl/cu118"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cuda124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-rocm"
+url = "https://download.pytorch.org/whl/rocm6.2.4"
+explicit = true

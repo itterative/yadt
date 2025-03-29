@@ -6,8 +6,3 @@ torchvision==0.21.0+cpu
 
 # smilingwolf
 onnxruntime>=1.12.0
-
-# common
-pillow>=9.0.0
-huggingface-hub
-numpy==1.24.3

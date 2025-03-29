@@ -1,0 +1,9 @@
+--extra-index-url https://download.pytorch.org/whl/rocm6.2.4
+
+# camie
+pytorch-triton-rocm==3.2.0
+torch==2.6.0
+torchvision==0.21.0
+
+# smilingwolf
+onnxruntime-gpu>=1.12.0

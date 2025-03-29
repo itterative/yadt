@@ -1,6 +1,12 @@
 version = 1
 revision = 1
 requires-python = ">=3.13"
+conflicts = [[
+    { package = "yadt", extra = "cpu" },
+    { package = "yadt", extra = "cuda118" },
+    { package = "yadt", extra = "cuda124" },
+    { package = "yadt", extra = "rocm" },
+]]
 
 [[package]]
 name = "aiofiles"
@@ -109,7 +115,7 @@ name = "click"
 version = "8.1.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32'" },
+    { name = "colorama", marker = "sys_platform == 'win32' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/b9/2e/0090cbf739cee7d23781ad4b89a9894a41538e4fcf4c31dcdd705b78eb8b/click-8.1.8.tar.gz", hash = "sha256:ed53c9d8990d83c2a27deae68e4ee337473f6330c040a31d4225c9574d16096a", size = 226593 }
 wheels = [
@@ -135,6 +141,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/cc/c7/eed8f27100517e8c0e6b923d5f0845d0cb99763da6fdee00478f91db7325/coloredlogs-15.0.1.tar.gz", hash = "sha256:7c991aa71a4577af2f82600d8f8f3a89f936baeaf9b50a9c197da014e5bf16b0", size = 278520 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a7/06/3d6badcf13db419e25b07041d9c7b4a2c331d3f4e7134445ec5df57714cd/coloredlogs-15.0.1-py2.py3-none-any.whl", hash = "sha256:612ee75c546f53e92e70049c9dbfcc18c935a2b9a53b66085ce9ef6a6e5c0934", size = 46018 },
+]
+
+[[package]]
+name = "einops"
+version = "0.8.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e5/81/df4fbe24dff8ba3934af99044188e20a98ed441ad17a274539b74e82e126/einops-0.8.1.tar.gz", hash = "sha256:de5d960a7a761225532e0f1959e5315ebeafc0cd43394732f103ca44b9837e84", size = 54805 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/87/62/9773de14fe6c45c23649e98b83231fffd7b9892b6cf863251dc2afa73643/einops-0.8.1-py3-none-any.whl", hash = "sha256:919387eb55330f5757c6bea9165c5ff5cfe63a642682ea788a6d472576d81737", size = 64359 },
 ]
 
 [[package]]
@@ -211,15 +226,15 @@ dependencies = [
     { name = "pydub" },
     { name = "python-multipart" },
     { name = "pyyaml" },
-    { name = "ruff", marker = "sys_platform != 'emscripten'" },
+    { name = "ruff", marker = "sys_platform != 'emscripten' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
     { name = "safehttpx" },
     { name = "semantic-version" },
-    { name = "starlette", marker = "sys_platform != 'emscripten'" },
+    { name = "starlette", marker = "sys_platform != 'emscripten' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
     { name = "tomlkit" },
-    { name = "typer", marker = "sys_platform != 'emscripten'" },
+    { name = "typer", marker = "sys_platform != 'emscripten' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
     { name = "typing-extensions" },
-    { name = "urllib3", marker = "sys_platform == 'emscripten'" },
-    { name = "uvicorn", marker = "sys_platform != 'emscripten'" },
+    { name = "urllib3", marker = "sys_platform == 'emscripten' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "uvicorn", marker = "sys_platform != 'emscripten' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b6/2e/3dddfdec4144ef1c2203e3ce3a2112720e757996995cdd579aaedc0876bf/gradio-5.16.1-py3-none-any.whl", hash = "sha256:a49f194ca314a09e4f7655a8fbcf8efae961a2bbf37877afc546fb506027f4dd", size = 62213705 },
@@ -404,6 +419,269 @@ wheels = [
 ]
 
 [[package]]
+name = "nvidia-cublas-cu11"
+version = "11.11.3.6"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/46/be/c222e33e60d28ecd496a46fc4d78ccae0ee28e1fd7dc705b6288b4cad27e/nvidia_cublas_cu11-11.11.3.6-py3-none-manylinux1_x86_64.whl", hash = "sha256:39fb40e8f486dd8a2ddb8fdeefe1d5b28f5b99df01c87ab3676f057a74a5a6f3", size = 417870452 },
+    { url = "https://files.pythonhosted.org/packages/96/df/c5ac9ac5096355c47c606e613ecc7aa50fbccf5e0145df857d11da6464b1/nvidia_cublas_cu11-11.11.3.6-py3-none-manylinux2014_aarch64.whl", hash = "sha256:5ccae9e069a2c6be9af9cb5a0b0c6928c19c7915e390d15f598a1eead2a01a7a", size = 291428448 },
+    { url = "https://files.pythonhosted.org/packages/ea/2e/9d99c60771d275ecf6c914a612e9a577f740a615bc826bec132368e1d3ae/nvidia_cublas_cu11-11.11.3.6-py3-none-manylinux2014_x86_64.whl", hash = "sha256:60252822adea5d0b10cd990a7dc7bedf7435f30ae40083c7a624a85a43225abc", size = 417870460 },
+    { url = "https://files.pythonhosted.org/packages/0b/1d/7a78cd36fd5e3da4021b3ac2c2c8b2651dd72345b7c3ecc0d3e051884f50/nvidia_cublas_cu11-11.11.3.6-py3-none-win_amd64.whl", hash = "sha256:6ab12b1302bef8ac1ff4414edd1c059e57f4833abef9151683fb8f4de25900be", size = 427234740 },
+]
+
+[[package]]
+name = "nvidia-cublas-cu12"
+version = "12.4.5.8"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7f/7f/7fbae15a3982dc9595e49ce0f19332423b260045d0a6afe93cdbe2f1f624/nvidia_cublas_cu12-12.4.5.8-py3-none-manylinux2014_aarch64.whl", hash = "sha256:0f8aa1706812e00b9f19dfe0cdb3999b092ccb8ca168c0db5b8ea712456fd9b3", size = 363333771 },
+    { url = "https://files.pythonhosted.org/packages/ae/71/1c91302526c45ab494c23f61c7a84aa568b8c1f9d196efa5993957faf906/nvidia_cublas_cu12-12.4.5.8-py3-none-manylinux2014_x86_64.whl", hash = "sha256:2fc8da60df463fdefa81e323eef2e36489e1c94335b5358bcb38360adf75ac9b", size = 363438805 },
+    { url = "https://files.pythonhosted.org/packages/e2/2a/4f27ca96232e8b5269074a72e03b4e0d43aa68c9b965058b1684d07c6ff8/nvidia_cublas_cu12-12.4.5.8-py3-none-win_amd64.whl", hash = "sha256:5a796786da89203a0657eda402bcdcec6180254a8ac22d72213abc42069522dc", size = 396895858 },
+]
+
+[[package]]
+name = "nvidia-cuda-cupti-cu11"
+version = "11.8.87"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/27/c9/b4b15f709a694ea9f84871c6c4fbeeb54bab225962d852665a2c6f77f90d/nvidia_cuda_cupti_cu11-11.8.87-py3-none-manylinux1_x86_64.whl", hash = "sha256:0e50c707df56c75a2c0703dc6b886f3c97a22f37d6f63839f75b7418ba672a8d", size = 13093657 },
+    { url = "https://files.pythonhosted.org/packages/1e/5a/fb7e315aaa9d2bb28d3f2d9127375823c43646e07db4fe1b08746626e677/nvidia_cuda_cupti_cu11-11.8.87-py3-none-manylinux2014_aarch64.whl", hash = "sha256:9aaa638963a8271df26b6ee0d93b781730b7acc6581ff700bd023d7934e4385e", size = 11687484 },
+    { url = "https://files.pythonhosted.org/packages/74/42/9f5c5cc084ce6f3073048c4f6806f45ba4c8c73f227c9587215d9c372e05/nvidia_cuda_cupti_cu11-11.8.87-py3-none-manylinux2014_x86_64.whl", hash = "sha256:4191a17913a706b5098681280cd089cd7d8d3df209a6f5cb79384974a96d24f2", size = 13093662 },
+    { url = "https://files.pythonhosted.org/packages/9c/b9/371cff81be29e008a69f1681f468a2b428fa4ea03842196c178cb4cf1991/nvidia_cuda_cupti_cu11-11.8.87-py3-none-win_amd64.whl", hash = "sha256:4332d8550ad5f5b673f98d08e4e4f82030cb604c66d8d5ee919399ea01312e58", size = 9952361 },
+]
+
+[[package]]
+name = "nvidia-cuda-cupti-cu12"
+version = "12.4.127"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/93/b5/9fb3d00386d3361b03874246190dfec7b206fd74e6e287b26a8fcb359d95/nvidia_cuda_cupti_cu12-12.4.127-py3-none-manylinux2014_aarch64.whl", hash = "sha256:79279b35cf6f91da114182a5ce1864997fd52294a87a16179ce275773799458a", size = 12354556 },
+    { url = "https://files.pythonhosted.org/packages/67/42/f4f60238e8194a3106d06a058d494b18e006c10bb2b915655bd9f6ea4cb1/nvidia_cuda_cupti_cu12-12.4.127-py3-none-manylinux2014_x86_64.whl", hash = "sha256:9dec60f5ac126f7bb551c055072b69d85392b13311fcc1bcda2202d172df30fb", size = 13813957 },
+    { url = "https://files.pythonhosted.org/packages/f3/79/8cf313ec17c58ccebc965568e5bcb265cdab0a1df99c4e674bb7a3b99bfe/nvidia_cuda_cupti_cu12-12.4.127-py3-none-win_amd64.whl", hash = "sha256:5688d203301ab051449a2b1cb6690fbe90d2b372f411521c86018b950f3d7922", size = 9938035 },
+]
+
+[[package]]
+name = "nvidia-cuda-nvrtc-cu11"
+version = "11.8.89"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/83/08/a9833e4e9f9165bedb7f36033b47aa399b053b9cb2eaf7b84d1e28705cf7/nvidia_cuda_nvrtc_cu11-11.8.89-py3-none-manylinux1_x86_64.whl", hash = "sha256:1f27d67b0f72902e9065ae568b4f6268dfe49ba3ed269c9a3da99bb86d1d2008", size = 23173264 },
+    { url = "https://files.pythonhosted.org/packages/1d/ad/58a9f86b0280190582691b1141ac3678c08f698d3d6161eed5cbe4e43b46/nvidia_cuda_nvrtc_cu11-11.8.89-py3-none-manylinux2014_aarch64.whl", hash = "sha256:8ab17ed51e7c4928f7170a0551e3e3b42f89d973bd267ced9688c238b3e10aef", size = 22671777 },
+    { url = "https://files.pythonhosted.org/packages/60/44/202e027c224c26e15a53f01c5c7604c7f6b4fd368882d3164ea08fead207/nvidia_cuda_nvrtc_cu11-11.8.89-py3-none-manylinux2014_x86_64.whl", hash = "sha256:a8d02f3cba345be56b1ffc3e74d8f61f02bb758dd31b0f20e12277a5a244f756", size = 23173745 },
+    { url = "https://files.pythonhosted.org/packages/c9/19/17745076214b0cc985cfdbabe2b3108f1237704985dab5b748e48432aca1/nvidia_cuda_nvrtc_cu11-11.8.89-py3-none-win_amd64.whl", hash = "sha256:e18a23a8f4064664a6f1c4a64f38c581cbebfb5935280e94a4943ea8ae3791b1", size = 19034935 },
+]
+
+[[package]]
+name = "nvidia-cuda-nvrtc-cu12"
+version = "12.4.127"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/77/aa/083b01c427e963ad0b314040565ea396f914349914c298556484f799e61b/nvidia_cuda_nvrtc_cu12-12.4.127-py3-none-manylinux2014_aarch64.whl", hash = "sha256:0eedf14185e04b76aa05b1fea04133e59f465b6f960c0cbf4e37c3cb6b0ea198", size = 24133372 },
+    { url = "https://files.pythonhosted.org/packages/2c/14/91ae57cd4db3f9ef7aa99f4019cfa8d54cb4caa7e00975df6467e9725a9f/nvidia_cuda_nvrtc_cu12-12.4.127-py3-none-manylinux2014_x86_64.whl", hash = "sha256:a178759ebb095827bd30ef56598ec182b85547f1508941a3d560eb7ea1fbf338", size = 24640306 },
+    { url = "https://files.pythonhosted.org/packages/7c/30/8c844bfb770f045bcd8b2c83455c5afb45983e1a8abf0c4e5297b481b6a5/nvidia_cuda_nvrtc_cu12-12.4.127-py3-none-win_amd64.whl", hash = "sha256:a961b2f1d5f17b14867c619ceb99ef6fcec12e46612711bcec78eb05068a60ec", size = 19751955 },
+]
+
+[[package]]
+name = "nvidia-cuda-runtime-cu11"
+version = "11.8.89"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/45/3e/84db02be49fe6d6df6e42f69fd64501c22d0f9ada9c9877f885612085d20/nvidia_cuda_runtime_cu11-11.8.89-py3-none-manylinux1_x86_64.whl", hash = "sha256:f587bd726eb2f7612cf77ce38a2c1e65cf23251ff49437f6161ce0d647f64f7c", size = 875585 },
+    { url = "https://files.pythonhosted.org/packages/da/16/86d6f3f25c1d69cfcaa01c9a9704b7e946387b7aa13cc2f385b50eb46da5/nvidia_cuda_runtime_cu11-11.8.89-py3-none-manylinux2014_aarch64.whl", hash = "sha256:e53bf160b6b660819cb6e4a9da2cc89e6aa2329858299780a2459780a2b8d012", size = 805995 },
+    { url = "https://files.pythonhosted.org/packages/a6/ec/a540f28b31de7bc1ed49eecc72035d4cb77db88ead1d42f7bfa5ae407ac6/nvidia_cuda_runtime_cu11-11.8.89-py3-none-manylinux2014_x86_64.whl", hash = "sha256:92d04069a987e1fbc9213f8376d265df0f7bb42617d44f5eda1f496acea7f2d1", size = 875592 },
+    { url = "https://files.pythonhosted.org/packages/48/ae/09f335dfbca630ae213e53d2a9294540620453fe2b37e7489ff05817a525/nvidia_cuda_runtime_cu11-11.8.89-py3-none-win_amd64.whl", hash = "sha256:f60c9fdaed8065b38de8097867240efc5556a8a710007146daeb9082334a6e63", size = 1021163 },
+]
+
+[[package]]
+name = "nvidia-cuda-runtime-cu12"
+version = "12.4.127"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a1/aa/b656d755f474e2084971e9a297def515938d56b466ab39624012070cb773/nvidia_cuda_runtime_cu12-12.4.127-py3-none-manylinux2014_aarch64.whl", hash = "sha256:961fe0e2e716a2a1d967aab7caee97512f71767f852f67432d572e36cb3a11f3", size = 894177 },
+    { url = "https://files.pythonhosted.org/packages/ea/27/1795d86fe88ef397885f2e580ac37628ed058a92ed2c39dc8eac3adf0619/nvidia_cuda_runtime_cu12-12.4.127-py3-none-manylinux2014_x86_64.whl", hash = "sha256:64403288fa2136ee8e467cdc9c9427e0434110899d07c779f25b5c068934faa5", size = 883737 },
+    { url = "https://files.pythonhosted.org/packages/a8/8b/450e93fab75d85a69b50ea2d5fdd4ff44541e0138db16f9cd90123ef4de4/nvidia_cuda_runtime_cu12-12.4.127-py3-none-win_amd64.whl", hash = "sha256:09c2e35f48359752dfa822c09918211844a3d93c100a715d79b59591130c5e1e", size = 878808 },
+]
+
+[[package]]
+name = "nvidia-cudnn-cu11"
+version = "9.1.0.70"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "nvidia-cublas-cu11", marker = "extra == 'extra-4-yadt-cuda118' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/00/3b/0b776f04e364cd99e4cf152c2a9eadb5934c67c9a91429da55169a9447fd/nvidia_cudnn_cu11-9.1.0.70-py3-none-manylinux2014_x86_64.whl", hash = "sha256:e6135ac63fe9d5b0b89cfb35c3fc1c1349f2b995becadf2e9dc21bca89d9633d", size = 663919573 },
+    { url = "https://files.pythonhosted.org/packages/8f/66/c0d600fa64b65e474eced8f07c4a6e9441aacf746f800fd12fe395dd09db/nvidia_cudnn_cu11-9.1.0.70-py3-none-win_amd64.whl", hash = "sha256:32f6a2fe80b4b7ebc5f9c4cb403c4c381eca99e6daa3cf38241047b3d3e14daa", size = 680107132 },
+]
+
+[[package]]
+name = "nvidia-cudnn-cu12"
+version = "9.1.0.70"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "nvidia-cublas-cu12", marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9f/fd/713452cd72343f682b1c7b9321e23829f00b842ceaedcda96e742ea0b0b3/nvidia_cudnn_cu12-9.1.0.70-py3-none-manylinux2014_x86_64.whl", hash = "sha256:165764f44ef8c61fcdfdfdbe769d687e06374059fbb388b6c89ecb0e28793a6f", size = 664752741 },
+    { url = "https://files.pythonhosted.org/packages/3f/d0/f90ee6956a628f9f04bf467932c0a25e5a7e706a684b896593c06c82f460/nvidia_cudnn_cu12-9.1.0.70-py3-none-win_amd64.whl", hash = "sha256:6278562929433d68365a07a4a1546c237ba2849852c0d4b2262a486e805b977a", size = 679925892 },
+]
+
+[[package]]
+name = "nvidia-cufft-cu11"
+version = "10.9.0.58"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/74/79/b912a77e38e41f15a0581a59f5c3548d1ddfdda3225936fb67c342719e7a/nvidia_cufft_cu11-10.9.0.58-py3-none-manylinux1_x86_64.whl", hash = "sha256:222f9da70c80384632fd6035e4c3f16762d64ea7a843829cb278f98b3cb7dd81", size = 168405414 },
+    { url = "https://files.pythonhosted.org/packages/71/7a/a2ad9951d57c3cc23f4fa6d84b146afd9f375ffbc744b38935930ac4393f/nvidia_cufft_cu11-10.9.0.58-py3-none-manylinux2014_aarch64.whl", hash = "sha256:34b7315104e615b230dc3c2d1861f13bff9ec465c5d3b4bb65b4986d03a1d8d4", size = 111231060 },
+    { url = "https://files.pythonhosted.org/packages/64/c8/133717b43182ba063803e983e7680a94826a9f4ff5734af0ca315803f1b3/nvidia_cufft_cu11-10.9.0.58-py3-none-manylinux2014_x86_64.whl", hash = "sha256:e21037259995243cc370dd63c430d77ae9280bedb68d5b5a18226bfc92e5d748", size = 168405419 },
+    { url = "https://files.pythonhosted.org/packages/f8/b4/e432a74f8db0e84f734dc14d36c0e529225132bf7e239da21f55893351a6/nvidia_cufft_cu11-10.9.0.58-py3-none-win_amd64.whl", hash = "sha256:c4d316f17c745ec9c728e30409612eaf77a8404c3733cdf6c9c1569634d1ca03", size = 172237004 },
+]
+
+[[package]]
+name = "nvidia-cufft-cu12"
+version = "11.2.1.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "nvidia-nvjitlink-cu12", marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7a/8a/0e728f749baca3fbeffad762738276e5df60851958be7783af121a7221e7/nvidia_cufft_cu12-11.2.1.3-py3-none-manylinux2014_aarch64.whl", hash = "sha256:5dad8008fc7f92f5ddfa2101430917ce2ffacd86824914c82e28990ad7f00399", size = 211422548 },
+    { url = "https://files.pythonhosted.org/packages/27/94/3266821f65b92b3138631e9c8e7fe1fb513804ac934485a8d05776e1dd43/nvidia_cufft_cu12-11.2.1.3-py3-none-manylinux2014_x86_64.whl", hash = "sha256:f083fc24912aa410be21fa16d157fed2055dab1cc4b6934a0e03cba69eb242b9", size = 211459117 },
+    { url = "https://files.pythonhosted.org/packages/f6/ee/3f3f8e9874f0be5bbba8fb4b62b3de050156d159f8b6edc42d6f1074113b/nvidia_cufft_cu12-11.2.1.3-py3-none-win_amd64.whl", hash = "sha256:d802f4954291101186078ccbe22fc285a902136f974d369540fd4a5333d1440b", size = 210576476 },
+]
+
+[[package]]
+name = "nvidia-curand-cu11"
+version = "10.3.0.86"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/49/28/c47f8e2439ddbcbeae3cf74d43ed572b651d630ea72863d5357f3759eb66/nvidia_curand_cu11-10.3.0.86-py3-none-manylinux1_x86_64.whl", hash = "sha256:ac439548c88580269a1eb6aeb602a5aed32f0dbb20809a31d9ed7d01d77f6bf5", size = 58124493 },
+    { url = "https://files.pythonhosted.org/packages/5d/c0/aec095de6cb3b07197042f9ff8958eda2a5eaaefabc8db2e3bfa32aafb97/nvidia_curand_cu11-10.3.0.86-py3-none-manylinux2014_aarch64.whl", hash = "sha256:64defc3016d8c1de351a764617818c2961210430f12476faee10084b269b188c", size = 58134524 },
+    { url = "https://files.pythonhosted.org/packages/58/e5/ce5806afc48a6e4e0dddd25316ac60b6fa94fd1791bdbf4ca17bf52696ea/nvidia_curand_cu11-10.3.0.86-py3-none-manylinux2014_x86_64.whl", hash = "sha256:cd4cffbf78bb06580206b4814d5dc696d1161c902aae37b2bba00056832379e6", size = 58124497 },
+    { url = "https://files.pythonhosted.org/packages/ae/e0/a68e20f37512c2ff22c1b2707383faec80acc20c39727e4007065ed284ea/nvidia_curand_cu11-10.3.0.86-py3-none-win_amd64.whl", hash = "sha256:8fa8365065fc3e3760d7437b08f164a6bcf8f7124f3b544d2463ded01e6bdc70", size = 57597791 },
+]
+
+[[package]]
+name = "nvidia-curand-cu12"
+version = "10.3.5.147"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/80/9c/a79180e4d70995fdf030c6946991d0171555c6edf95c265c6b2bf7011112/nvidia_curand_cu12-10.3.5.147-py3-none-manylinux2014_aarch64.whl", hash = "sha256:1f173f09e3e3c76ab084aba0de819c49e56614feae5c12f69883f4ae9bb5fad9", size = 56314811 },
+    { url = "https://files.pythonhosted.org/packages/8a/6d/44ad094874c6f1b9c654f8ed939590bdc408349f137f9b98a3a23ccec411/nvidia_curand_cu12-10.3.5.147-py3-none-manylinux2014_x86_64.whl", hash = "sha256:a88f583d4e0bb643c49743469964103aa59f7f708d862c3ddb0fc07f851e3b8b", size = 56305206 },
+    { url = "https://files.pythonhosted.org/packages/1c/22/2573503d0d4e45673c263a313f79410e110eb562636b0617856fdb2ff5f6/nvidia_curand_cu12-10.3.5.147-py3-none-win_amd64.whl", hash = "sha256:f307cc191f96efe9e8f05a87096abc20d08845a841889ef78cb06924437f6771", size = 55799918 },
+]
+
+[[package]]
+name = "nvidia-cusolver-cu11"
+version = "11.4.1.48"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "nvidia-cublas-cu11", marker = "extra == 'extra-4-yadt-cuda118' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/55/ee/939ff0104991dd7bdabb4c9767994c612ba0e1c9a55672a1ddd42f5e5b16/nvidia_cusolver_cu11-11.4.1.48-py3-none-manylinux1_x86_64.whl", hash = "sha256:ca538f545645b7e6629140786d3127fe067b3d5a085bd794cde5bfe877c8926f", size = 128240842 },
+    { url = "https://files.pythonhosted.org/packages/d8/32/676f0cfea4ff5bbc6dcfe00b5f385ba49d322dc8e9ff1ef864b570e27e9e/nvidia_cusolver_cu11-11.4.1.48-py3-none-manylinux2014_aarch64.whl", hash = "sha256:1a96acb05768610bc414dbef5b25ebd2d820fc8a1e8c72097f41f53d80934d61", size = 127903177 },
+    { url = "https://files.pythonhosted.org/packages/52/fe/866e87e6e6a1b0a5fcf8524a058042656702f2057e22bfdb8899a7c38e10/nvidia_cusolver_cu11-11.4.1.48-py3-none-manylinux2014_x86_64.whl", hash = "sha256:ea9fb1ad8c644ca9ed55af13cc39af3b7ba4c3eb5aef18471fe1fe77d94383cb", size = 128246438 },
+    { url = "https://files.pythonhosted.org/packages/1e/94/4fd658d09776307b98411eca09dd77773d8c3bdc484b186a2084038b75e2/nvidia_cusolver_cu11-11.4.1.48-py3-none-win_amd64.whl", hash = "sha256:7efe43b113495a64e2cf9a0b4365bd53b0a82afb2e2cf91e9f993c9ef5e69ee8", size = 125732382 },
+]
+
+[[package]]
+name = "nvidia-cusolver-cu12"
+version = "11.6.1.9"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "nvidia-cublas-cu12", marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cusparse-cu12", marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-nvjitlink-cu12", marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/46/6b/a5c33cf16af09166845345275c34ad2190944bcc6026797a39f8e0a282e0/nvidia_cusolver_cu12-11.6.1.9-py3-none-manylinux2014_aarch64.whl", hash = "sha256:d338f155f174f90724bbde3758b7ac375a70ce8e706d70b018dd3375545fc84e", size = 127634111 },
+    { url = "https://files.pythonhosted.org/packages/3a/e1/5b9089a4b2a4790dfdea8b3a006052cfecff58139d5a4e34cb1a51df8d6f/nvidia_cusolver_cu12-11.6.1.9-py3-none-manylinux2014_x86_64.whl", hash = "sha256:19e33fa442bcfd085b3086c4ebf7e8debc07cfe01e11513cc6d332fd918ac260", size = 127936057 },
+    { url = "https://files.pythonhosted.org/packages/f2/be/d435b7b020e854d5d5a682eb5de4328fd62f6182507406f2818280e206e2/nvidia_cusolver_cu12-11.6.1.9-py3-none-win_amd64.whl", hash = "sha256:e77314c9d7b694fcebc84f58989f3aa4fb4cb442f12ca1a9bde50f5e8f6d1b9c", size = 125224015 },
+]
+
+[[package]]
+name = "nvidia-cusparse-cu11"
+version = "11.7.5.86"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c1/e0/21b829c535d569831835a4ca5d049a19ba00d3e91f3e12ab4ad27bd7385f/nvidia_cusparse_cu11-11.7.5.86-py3-none-manylinux1_x86_64.whl", hash = "sha256:4ae709fe78d3f23f60acaba8c54b8ad556cf16ca486e0cc1aa92dca7555d2d2b", size = 204126221 },
+    { url = "https://files.pythonhosted.org/packages/a2/6e/4eb2842e7ab1804072bca43030a8b92731e5a35f6a4a1b8f1aa8fa5f411c/nvidia_cusparse_cu11-11.7.5.86-py3-none-manylinux2014_aarch64.whl", hash = "sha256:6c7da46abee7567e619d4aa2e90a1b032cfcbd1211d429853b1a6e87514a14b2", size = 203917797 },
+    { url = "https://files.pythonhosted.org/packages/ed/5c/b0333b07c51ced77397c2fb0d9826072cea0da9d421aa7e792aa0f8ecc72/nvidia_cusparse_cu11-11.7.5.86-py3-none-manylinux2014_x86_64.whl", hash = "sha256:8d7cf1628fd8d462b5d2ba6678fae34733a48ecb80495b9c68672ec6a6dde5ef", size = 204126227 },
+    { url = "https://files.pythonhosted.org/packages/b8/36/a670e8ca1deccd3c63be4d0286491cf5c6375253f0d948e7cc5167fe1da9/nvidia_cusparse_cu11-11.7.5.86-py3-none-win_amd64.whl", hash = "sha256:a0f6ee81cd91be606fc2f55992d06b09cd4e86d74b6ae5e8dd1631cf7f5a8706", size = 203420667 },
+]
+
+[[package]]
+name = "nvidia-cusparse-cu12"
+version = "12.3.1.170"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "nvidia-nvjitlink-cu12", marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/96/a9/c0d2f83a53d40a4a41be14cea6a0bf9e668ffcf8b004bd65633f433050c0/nvidia_cusparse_cu12-12.3.1.170-py3-none-manylinux2014_aarch64.whl", hash = "sha256:9d32f62896231ebe0480efd8a7f702e143c98cfaa0e8a76df3386c1ba2b54df3", size = 207381987 },
+    { url = "https://files.pythonhosted.org/packages/db/f7/97a9ea26ed4bbbfc2d470994b8b4f338ef663be97b8f677519ac195e113d/nvidia_cusparse_cu12-12.3.1.170-py3-none-manylinux2014_x86_64.whl", hash = "sha256:ea4f11a2904e2a8dc4b1833cc1b5181cde564edd0d5cd33e3c168eff2d1863f1", size = 207454763 },
+    { url = "https://files.pythonhosted.org/packages/a2/e0/3155ca539760a8118ec94cc279b34293309bcd14011fc724f87f31988843/nvidia_cusparse_cu12-12.3.1.170-py3-none-win_amd64.whl", hash = "sha256:9bc90fb087bc7b4c15641521f31c0371e9a612fc2ba12c338d3ae032e6b6797f", size = 204684315 },
+]
+
+[[package]]
+name = "nvidia-cusparselt-cu12"
+version = "0.6.2"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/98/8e/675498726c605c9441cf46653bd29cb1b8666da1fb1469ffa25f67f20c58/nvidia_cusparselt_cu12-0.6.2-py3-none-manylinux2014_aarch64.whl", hash = "sha256:067a7f6d03ea0d4841c85f0c6f1991c5dda98211f6302cb83a4ab234ee95bef8", size = 149422781 },
+    { url = "https://files.pythonhosted.org/packages/78/a8/bcbb63b53a4b1234feeafb65544ee55495e1bb37ec31b999b963cbccfd1d/nvidia_cusparselt_cu12-0.6.2-py3-none-manylinux2014_x86_64.whl", hash = "sha256:df2c24502fd76ebafe7457dbc4716b2fec071aabaed4fb7691a201cde03704d9", size = 150057751 },
+    { url = "https://files.pythonhosted.org/packages/56/8f/2c33082238b6c5e783a877dc8786ab62619e3e6171c083bd3bba6e3fe75e/nvidia_cusparselt_cu12-0.6.2-py3-none-win_amd64.whl", hash = "sha256:0057c91d230703924c0422feabe4ce768841f9b4b44d28586b6f6d2eb86fbe70", size = 148755794 },
+]
+
+[[package]]
+name = "nvidia-nccl-cu11"
+version = "2.21.5"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ac/9a/8b6a28b3b87d5fddab0e92cd835339eb8fbddaa71ae67518c8c1b3d05bae/nvidia_nccl_cu11-2.21.5-py3-none-manylinux2014_x86_64.whl", hash = "sha256:49d8350629c7888701d1fd200934942671cb5c728f49acc5a0b3a768820bed29", size = 147811630 },
+]
+
+[[package]]
+name = "nvidia-nccl-cu12"
+version = "2.21.5"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/df/99/12cd266d6233f47d00daf3a72739872bdc10267d0383508b0b9c84a18bb6/nvidia_nccl_cu12-2.21.5-py3-none-manylinux2014_x86_64.whl", hash = "sha256:8579076d30a8c24988834445f8d633c697d42397e92ffc3f63fa26766d25e0a0", size = 188654414 },
+]
+
+[[package]]
+name = "nvidia-nvjitlink-cu12"
+version = "12.4.127"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/02/45/239d52c05074898a80a900f49b1615d81c07fceadd5ad6c4f86a987c0bc4/nvidia_nvjitlink_cu12-12.4.127-py3-none-manylinux2014_aarch64.whl", hash = "sha256:4abe7fef64914ccfa909bc2ba39739670ecc9e820c83ccc7a6ed414122599b83", size = 20552510 },
+    { url = "https://files.pythonhosted.org/packages/ff/ff/847841bacfbefc97a00036e0fce5a0f086b640756dc38caea5e1bb002655/nvidia_nvjitlink_cu12-12.4.127-py3-none-manylinux2014_x86_64.whl", hash = "sha256:06b3b9b25bf3f8af351d664978ca26a16d2c5127dbd53c0497e28d1fb9611d57", size = 21066810 },
+    { url = "https://files.pythonhosted.org/packages/81/19/0babc919031bee42620257b9a911c528f05fb2688520dcd9ca59159ffea8/nvidia_nvjitlink_cu12-12.4.127-py3-none-win_amd64.whl", hash = "sha256:fd9020c501d27d135f983c6d3e244b197a7ccad769e34df53a42e276b0e25fa1", size = 95336325 },
+]
+
+[[package]]
+name = "nvidia-nvtx-cu11"
+version = "11.8.86"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d5/a2/23214c23118784dc2189ac2d2e48190df3e4206e2f73eb17d47140797a2b/nvidia_nvtx_cu11-11.8.86-py3-none-manylinux1_x86_64.whl", hash = "sha256:890656d8bd9b4e280231c832e1f0d03459200ba4824ddda3dcb59b1e1989b9f5", size = 99125 },
+    { url = "https://files.pythonhosted.org/packages/42/b9/385e4323646d21f9aedb9e953e5c778311cd8df32eb2237f1ce242c58572/nvidia_nvtx_cu11-11.8.86-py3-none-manylinux2014_aarch64.whl", hash = "sha256:5e84b97062eb102b45a8a9172a06cfe28b239b1635075a13d6474e91295e0468", size = 100401 },
+    { url = "https://files.pythonhosted.org/packages/b5/ad/973a187b137a3d45dc3faac421ef1275fb41fc169fd3889e2d5ceb0daa54/nvidia_nvtx_cu11-11.8.86-py3-none-manylinux2014_x86_64.whl", hash = "sha256:979f5b2aef5da164c5c53c64c85c3dfa61b8b4704f4f963bb568bf98fa8472e8", size = 99130 },
+    { url = "https://files.pythonhosted.org/packages/3f/3f/0e1dd2bc4d89f838b86c76956ffa514307d3be4d8b5ee0da4e9d12a8b54b/nvidia_nvtx_cu11-11.8.86-py3-none-win_amd64.whl", hash = "sha256:54031010ee38d774b2991004d88f90bbd7bbc1458a96bbc4b42662756508c252", size = 66297 },
+]
+
+[[package]]
+name = "nvidia-nvtx-cu12"
+version = "12.4.127"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/06/39/471f581edbb7804b39e8063d92fc8305bdc7a80ae5c07dbe6ea5c50d14a5/nvidia_nvtx_cu12-12.4.127-py3-none-manylinux2014_aarch64.whl", hash = "sha256:7959ad635db13edf4fc65c06a6e9f9e55fc2f92596db928d169c0bb031e88ef3", size = 100417 },
+    { url = "https://files.pythonhosted.org/packages/87/20/199b8713428322a2f22b722c62b8cc278cc53dffa9705d744484b5035ee9/nvidia_nvtx_cu12-12.4.127-py3-none-manylinux2014_x86_64.whl", hash = "sha256:781e950d9b9f60d8241ccea575b32f5105a5baf4c2351cab5256a24869f12a1a", size = 99144 },
+    { url = "https://files.pythonhosted.org/packages/54/1b/f77674fbb73af98843be25803bbd3b9a4f0a96c75b8d33a2854a5c7d2d77/nvidia_nvtx_cu12-12.4.127-py3-none-win_amd64.whl", hash = "sha256:641dccaaa1139f3ffb0d3164b4b84f9d253397e38246a4f2f36728b48566d485", size = 66307 },
+]
+
+[[package]]
 name = "onnxruntime"
 version = "1.20.1"
 source = { registry = "https://pypi.org/simple" }
@@ -422,6 +700,24 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/d8/e0/50db43188ca1c945decaa8fc2a024c33446d31afed40149897d4f9de505f/onnxruntime-1.20.1-cp313-cp313-win_amd64.whl", hash = "sha256:d30367df7e70f1d9fc5a6a68106f5961686d39b54d3221f760085524e8d38e16", size = 11331758 },
     { url = "https://files.pythonhosted.org/packages/d8/55/3821c5fd60b52a6c82a00bba18531793c93c4addfe64fbf061e235c5617a/onnxruntime-1.20.1-cp313-cp313t-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:c9158465745423b2b5d97ed25aa7740c7d38d2993ee2e5c3bfacb0c4145c49d8", size = 11950342 },
     { url = "https://files.pythonhosted.org/packages/14/56/fd990ca222cef4f9f4a9400567b9a15b220dee2eafffb16b2adbc55c8281/onnxruntime-1.20.1-cp313-cp313t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:0df6f2df83d61f46e842dbcde610ede27218947c33e994545a22333491e72a3b", size = 13337040 },
+]
+
+[[package]]
+name = "onnxruntime-gpu"
+version = "1.21.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "coloredlogs" },
+    { name = "flatbuffers" },
+    { name = "numpy" },
+    { name = "packaging" },
+    { name = "protobuf" },
+    { name = "sympy" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d8/c2/3d4807b3555f80501ee126e4fad40f9a47a9d3882b0369e2d624e9d19df8/onnxruntime_gpu-1.21.0-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:379f473c767e3cbaa1ee8563de29060cbf813ffc79967e932c2ae5780394bbb7", size = 280810186 },
+    { url = "https://files.pythonhosted.org/packages/f2/49/465afd3264e4707900851f53412c5cebe964c7a4d3a04fe6836af4fc6604/onnxruntime_gpu-1.21.0-cp313-cp313-win_amd64.whl", hash = "sha256:e6e5d9dc78b8e16bc631e675af6b094449b7adf4ec41bb2aeaa69b25a6d8f181", size = 213081727 },
+    { url = "https://files.pythonhosted.org/packages/12/f2/4549463ba3b756041a492b9f9959a4a88c302246fd12d0601a01079d76b8/onnxruntime_gpu-1.21.0-cp313-cp313t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:5fb033a0647534590fc57219b59a12917c47bbdd79c41854a1549f3125306aea", size = 280804460 },
 ]
 
 [[package]]
@@ -610,6 +906,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pytorch-triton-rocm"
+version = "3.2.0"
+source = { registry = "https://download.pytorch.org/whl/rocm6.2.4" }
+wheels = [
+    { url = "https://download.pytorch.org/whl/pytorch_triton_rocm-3.2.0-cp313-cp313-linux_x86_64.whl", hash = "sha256:57b33cdf2063f3c1b52ce38fc12843ab8ba4383035dab4c67194b5313d83c3eb" },
+    { url = "https://download.pytorch.org/whl/pytorch_triton_rocm-3.2.0-cp313-cp313t-linux_x86_64.whl", hash = "sha256:4f07fbb0201218e1d2892cae5ba78edf2d60f15066ae794d63c2d786d1fb137e" },
+]
+
+[[package]]
 name = "pytz"
 version = "2025.1"
 source = { registry = "https://pypi.org/simple" }
@@ -633,6 +938,29 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/fe/0f/25911a9f080464c59fab9027482f822b86bf0608957a5fcc6eaac85aa515/PyYAML-6.0.2-cp313-cp313-musllinux_1_1_x86_64.whl", hash = "sha256:68ccc6023a3400877818152ad9a1033e3db8625d899c72eacb5a668902e4d652", size = 751597 },
     { url = "https://files.pythonhosted.org/packages/14/0d/e2c3b43bbce3cf6bd97c840b46088a3031085179e596d4929729d8d68270/PyYAML-6.0.2-cp313-cp313-win32.whl", hash = "sha256:bc2fa7c6b47d6bc618dd7fb02ef6fdedb1090ec036abab80d4681424b84c1183", size = 140527 },
     { url = "https://files.pythonhosted.org/packages/fa/de/02b54f42487e3d3c6efb3f89428677074ca7bf43aae402517bc7cca949f3/PyYAML-6.0.2-cp313-cp313-win_amd64.whl", hash = "sha256:8388ee1976c416731879ac16da0aff3f63b286ffdd57cdeb95f3f2e085687563", size = 156446 },
+]
+
+[[package]]
+name = "regex"
+version = "2024.11.6"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/8e/5f/bd69653fbfb76cf8604468d3b4ec4c403197144c7bfe0e6a5fc9e02a07cb/regex-2024.11.6.tar.gz", hash = "sha256:7ab159b063c52a0333c884e4679f8d7a85112ee3078fe3d9004b2dd875585519", size = 399494 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/90/73/bcb0e36614601016552fa9344544a3a2ae1809dc1401b100eab02e772e1f/regex-2024.11.6-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:a6ba92c0bcdf96cbf43a12c717eae4bc98325ca3730f6b130ffa2e3c3c723d84", size = 483525 },
+    { url = "https://files.pythonhosted.org/packages/0f/3f/f1a082a46b31e25291d830b369b6b0c5576a6f7fb89d3053a354c24b8a83/regex-2024.11.6-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:525eab0b789891ac3be914d36893bdf972d483fe66551f79d3e27146191a37d4", size = 288324 },
+    { url = "https://files.pythonhosted.org/packages/09/c9/4e68181a4a652fb3ef5099e077faf4fd2a694ea6e0f806a7737aff9e758a/regex-2024.11.6-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:086a27a0b4ca227941700e0b31425e7a28ef1ae8e5e05a33826e17e47fbfdba0", size = 284617 },
+    { url = "https://files.pythonhosted.org/packages/fc/fd/37868b75eaf63843165f1d2122ca6cb94bfc0271e4428cf58c0616786dce/regex-2024.11.6-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:bde01f35767c4a7899b7eb6e823b125a64de314a8ee9791367c9a34d56af18d0", size = 795023 },
+    { url = "https://files.pythonhosted.org/packages/c4/7c/d4cd9c528502a3dedb5c13c146e7a7a539a3853dc20209c8e75d9ba9d1b2/regex-2024.11.6-cp313-cp313-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:b583904576650166b3d920d2bcce13971f6f9e9a396c673187f49811b2769dc7", size = 833072 },
+    { url = "https://files.pythonhosted.org/packages/4f/db/46f563a08f969159c5a0f0e722260568425363bea43bb7ae370becb66a67/regex-2024.11.6-cp313-cp313-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:1c4de13f06a0d54fa0d5ab1b7138bfa0d883220965a29616e3ea61b35d5f5fc7", size = 823130 },
+    { url = "https://files.pythonhosted.org/packages/db/60/1eeca2074f5b87df394fccaa432ae3fc06c9c9bfa97c5051aed70e6e00c2/regex-2024.11.6-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3cde6e9f2580eb1665965ce9bf17ff4952f34f5b126beb509fee8f4e994f143c", size = 796857 },
+    { url = "https://files.pythonhosted.org/packages/10/db/ac718a08fcee981554d2f7bb8402f1faa7e868c1345c16ab1ebec54b0d7b/regex-2024.11.6-cp313-cp313-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:0d7f453dca13f40a02b79636a339c5b62b670141e63efd511d3f8f73fba162b3", size = 784006 },
+    { url = "https://files.pythonhosted.org/packages/c2/41/7da3fe70216cea93144bf12da2b87367590bcf07db97604edeea55dac9ad/regex-2024.11.6-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:59dfe1ed21aea057a65c6b586afd2a945de04fc7db3de0a6e3ed5397ad491b07", size = 781650 },
+    { url = "https://files.pythonhosted.org/packages/a7/d5/880921ee4eec393a4752e6ab9f0fe28009435417c3102fc413f3fe81c4e5/regex-2024.11.6-cp313-cp313-musllinux_1_2_i686.whl", hash = "sha256:b97c1e0bd37c5cd7902e65f410779d39eeda155800b65fc4d04cc432efa9bc6e", size = 789545 },
+    { url = "https://files.pythonhosted.org/packages/dc/96/53770115e507081122beca8899ab7f5ae28ae790bfcc82b5e38976df6a77/regex-2024.11.6-cp313-cp313-musllinux_1_2_ppc64le.whl", hash = "sha256:f9d1e379028e0fc2ae3654bac3cbbef81bf3fd571272a42d56c24007979bafb6", size = 853045 },
+    { url = "https://files.pythonhosted.org/packages/31/d3/1372add5251cc2d44b451bd94f43b2ec78e15a6e82bff6a290ef9fd8f00a/regex-2024.11.6-cp313-cp313-musllinux_1_2_s390x.whl", hash = "sha256:13291b39131e2d002a7940fb176e120bec5145f3aeb7621be6534e46251912c4", size = 860182 },
+    { url = "https://files.pythonhosted.org/packages/ed/e3/c446a64984ea9f69982ba1a69d4658d5014bc7a0ea468a07e1a1265db6e2/regex-2024.11.6-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:4f51f88c126370dcec4908576c5a627220da6c09d0bff31cfa89f2523843316d", size = 787733 },
+    { url = "https://files.pythonhosted.org/packages/2b/f1/e40c8373e3480e4f29f2692bd21b3e05f296d3afebc7e5dcf21b9756ca1c/regex-2024.11.6-cp313-cp313-win32.whl", hash = "sha256:63b13cfd72e9601125027202cad74995ab26921d8cd935c25f09c630436348ff", size = 262122 },
+    { url = "https://files.pythonhosted.org/packages/45/94/bc295babb3062a731f52621cdc992d123111282e291abaf23faa413443ea/regex-2024.11.6-cp313-cp313-win_amd64.whl", hash = "sha256:2b3361af3198667e99927da8b84c1b010752fa4b1115ee30beaa332cabc3ef1a", size = 273545 },
 ]
 
 [[package]]
@@ -698,6 +1026,28 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/67/4c/19db75e6405692b2a96af8f06d1258f8aa7290bdc35ac966f03e207f6d7f/safehttpx-0.1.6.tar.gz", hash = "sha256:b356bfc82cee3a24c395b94a2dbeabbed60aff1aa5fa3b5fe97c4f2456ebce42", size = 9987 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/4d/c0/1108ad9f01567f66b3154063605b350b69c3c9366732e09e45f9fd0d1deb/safehttpx-0.1.6-py3-none-any.whl", hash = "sha256:407cff0b410b071623087c63dd2080c3b44dc076888d8c5823c00d1e58cb381c", size = 8692 },
+]
+
+[[package]]
+name = "safetensors"
+version = "0.5.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/71/7e/2d5d6ee7b40c0682315367ec7475693d110f512922d582fef1bd4a63adc3/safetensors-0.5.3.tar.gz", hash = "sha256:b6b0d6ecacec39a4fdd99cc19f4576f5219ce858e6fd8dbe7609df0b8dc56965", size = 67210 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/18/ae/88f6c49dbd0cc4da0e08610019a3c78a7d390879a919411a410a1876d03a/safetensors-0.5.3-cp38-abi3-macosx_10_12_x86_64.whl", hash = "sha256:bd20eb133db8ed15b40110b7c00c6df51655a2998132193de2f75f72d99c7073", size = 436917 },
+    { url = "https://files.pythonhosted.org/packages/b8/3b/11f1b4a2f5d2ab7da34ecc062b0bc301f2be024d110a6466726bec8c055c/safetensors-0.5.3-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:21d01c14ff6c415c485616b8b0bf961c46b3b343ca59110d38d744e577f9cce7", size = 418419 },
+    { url = "https://files.pythonhosted.org/packages/5d/9a/add3e6fef267658075c5a41573c26d42d80c935cdc992384dfae435feaef/safetensors-0.5.3-cp38-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:11bce6164887cd491ca75c2326a113ba934be596e22b28b1742ce27b1d076467", size = 459493 },
+    { url = "https://files.pythonhosted.org/packages/df/5c/bf2cae92222513cc23b3ff85c4a1bb2811a2c3583ac0f8e8d502751de934/safetensors-0.5.3-cp38-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:4a243be3590bc3301c821da7a18d87224ef35cbd3e5f5727e4e0728b8172411e", size = 472400 },
+    { url = "https://files.pythonhosted.org/packages/58/11/7456afb740bd45782d0f4c8e8e1bb9e572f1bf82899fb6ace58af47b4282/safetensors-0.5.3-cp38-abi3-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:8bd84b12b1670a6f8e50f01e28156422a2bc07fb16fc4e98bded13039d688a0d", size = 522891 },
+    { url = "https://files.pythonhosted.org/packages/57/3d/fe73a9d2ace487e7285f6e157afee2383bd1ddb911b7cb44a55cf812eae3/safetensors-0.5.3-cp38-abi3-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:391ac8cab7c829452175f871fcaf414aa1e292b5448bd02620f675a7f3e7abb9", size = 537694 },
+    { url = "https://files.pythonhosted.org/packages/a6/f8/dae3421624fcc87a89d42e1898a798bc7ff72c61f38973a65d60df8f124c/safetensors-0.5.3-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:cead1fa41fc54b1e61089fa57452e8834f798cb1dc7a09ba3524f1eb08e0317a", size = 471642 },
+    { url = "https://files.pythonhosted.org/packages/ce/20/1fbe16f9b815f6c5a672f5b760951e20e17e43f67f231428f871909a37f6/safetensors-0.5.3-cp38-abi3-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:1077f3e94182d72618357b04b5ced540ceb71c8a813d3319f1aba448e68a770d", size = 502241 },
+    { url = "https://files.pythonhosted.org/packages/5f/18/8e108846b506487aa4629fe4116b27db65c3dde922de2c8e0cc1133f3f29/safetensors-0.5.3-cp38-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:799021e78287bac619c7b3f3606730a22da4cda27759ddf55d37c8db7511c74b", size = 638001 },
+    { url = "https://files.pythonhosted.org/packages/82/5a/c116111d8291af6c8c8a8b40628fe833b9db97d8141c2a82359d14d9e078/safetensors-0.5.3-cp38-abi3-musllinux_1_2_armv7l.whl", hash = "sha256:df26da01aaac504334644e1b7642fa000bfec820e7cef83aeac4e355e03195ff", size = 734013 },
+    { url = "https://files.pythonhosted.org/packages/7d/ff/41fcc4d3b7de837963622e8610d998710705bbde9a8a17221d85e5d0baad/safetensors-0.5.3-cp38-abi3-musllinux_1_2_i686.whl", hash = "sha256:32c3ef2d7af8b9f52ff685ed0bc43913cdcde135089ae322ee576de93eae5135", size = 670687 },
+    { url = "https://files.pythonhosted.org/packages/40/ad/2b113098e69c985a3d8fbda4b902778eae4a35b7d5188859b4a63d30c161/safetensors-0.5.3-cp38-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:37f1521be045e56fc2b54c606d4455573e717b2d887c579ee1dbba5f868ece04", size = 643147 },
+    { url = "https://files.pythonhosted.org/packages/0a/0c/95aeb51d4246bd9a3242d3d8349c1112b4ee7611a4b40f0c5c93b05f001d/safetensors-0.5.3-cp38-abi3-win32.whl", hash = "sha256:cfc0ec0846dcf6763b0ed3d1846ff36008c6e7290683b61616c4b040f6a54ace", size = 296677 },
+    { url = "https://files.pythonhosted.org/packages/69/e2/b011c38e5394c4c18fb5500778a55ec43ad6106126e74723ffaee246f56e/safetensors-0.5.3-cp38-abi3-win_amd64.whl", hash = "sha256:836cbbc320b47e80acd40e44c8682db0e8ad7123209f69b093def21ec7cafd11", size = 308878 },
 ]
 
 [[package]]
@@ -770,26 +1120,50 @@ wheels = [
 ]
 
 [[package]]
-name = "tagging"
-version = "0.1.0"
-source = { virtual = "." }
+name = "timm"
+version = "1.0.15"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "gradio" },
     { name = "huggingface-hub" },
-    { name = "onnxruntime" },
-    { name = "pillow" },
-    { name = "torch" },
-    { name = "torchvision" },
+    { name = "pyyaml" },
+    { name = "safetensors" },
+    { name = "torch", version = "2.6.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "extra == 'extra-4-yadt-cpu' or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "torch", version = "2.6.0+cu118", source = { registry = "https://download.pytorch.org/whl/cu118" }, marker = "extra == 'extra-4-yadt-cuda118' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "torch", version = "2.6.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124" }, marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "torch", version = "2.6.0+rocm6.2.4", source = { registry = "https://download.pytorch.org/whl/rocm6.2.4" }, marker = "(extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "torchvision", version = "0.21.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "extra == 'extra-4-yadt-cpu' or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "torchvision", version = "0.21.0+cu118", source = { registry = "https://download.pytorch.org/whl/cu118" }, marker = "extra == 'extra-4-yadt-cuda118' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "torchvision", version = "0.21.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124" }, marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "torchvision", version = "0.21.0+rocm6.2.4", source = { registry = "https://download.pytorch.org/whl/rocm6.2.4" }, marker = "(extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/bc/0c/66b0f9b4a4cb9ffdac7b52b17b37c7d3c4f75623b469e388b0c6d89b4e88/timm-1.0.15.tar.gz", hash = "sha256:756a3bc30c96565f056e608a9b559daed904617eaadb6be536f96874879b1055", size = 2230258 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6c/d0/179abca8b984b3deefd996f362b612c39da73b60f685921e6cd58b6125b4/timm-1.0.15-py3-none-any.whl", hash = "sha256:5a3dc460c24e322ecc7fd1f3e3eb112423ddee320cb059cc1956fbc9731748ef", size = 2361373 },
 ]
 
-[package.metadata]
-requires-dist = [
-    { name = "gradio", specifier = ">=5.16.1" },
-    { name = "huggingface-hub", specifier = ">=0.29.0" },
-    { name = "onnxruntime", specifier = ">=1.12.0" },
-    { name = "pillow", specifier = ">=9.0.0" },
-    { name = "torch", specifier = "==2.6.0+cpu" },
-    { name = "torchvision", specifier = "==0.21.0+cpu" },
+[[package]]
+name = "tokenizers"
+version = "0.21.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "huggingface-hub" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/92/76/5ac0c97f1117b91b7eb7323dcd61af80d72f790b4df71249a7850c195f30/tokenizers-0.21.1.tar.gz", hash = "sha256:a1bb04dc5b448985f86ecd4b05407f5a8d97cb2c0532199b2a302a604a0165ab", size = 343256 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a5/1f/328aee25f9115bf04262e8b4e5a2050b7b7cf44b59c74e982db7270c7f30/tokenizers-0.21.1-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:e78e413e9e668ad790a29456e677d9d3aa50a9ad311a40905d6861ba7692cf41", size = 2780767 },
+    { url = "https://files.pythonhosted.org/packages/ae/1a/4526797f3719b0287853f12c5ad563a9be09d446c44ac784cdd7c50f76ab/tokenizers-0.21.1-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:cd51cd0a91ecc801633829fcd1fda9cf8682ed3477c6243b9a095539de4aecf3", size = 2650555 },
+    { url = "https://files.pythonhosted.org/packages/4d/7a/a209b29f971a9fdc1da86f917fe4524564924db50d13f0724feed37b2a4d/tokenizers-0.21.1-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:28da6b72d4fb14ee200a1bd386ff74ade8992d7f725f2bde2c495a9a98cf4d9f", size = 2937541 },
+    { url = "https://files.pythonhosted.org/packages/3c/1e/b788b50ffc6191e0b1fc2b0d49df8cff16fe415302e5ceb89f619d12c5bc/tokenizers-0.21.1-cp39-abi3-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:34d8cfde551c9916cb92014e040806122295a6800914bab5865deb85623931cf", size = 2819058 },
+    { url = "https://files.pythonhosted.org/packages/36/aa/3626dfa09a0ecc5b57a8c58eeaeb7dd7ca9a37ad9dd681edab5acd55764c/tokenizers-0.21.1-cp39-abi3-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:aaa852d23e125b73d283c98f007e06d4595732104b65402f46e8ef24b588d9f8", size = 3133278 },
+    { url = "https://files.pythonhosted.org/packages/a4/4d/8fbc203838b3d26269f944a89459d94c858f5b3f9a9b6ee9728cdcf69161/tokenizers-0.21.1-cp39-abi3-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:a21a15d5c8e603331b8a59548bbe113564136dc0f5ad8306dd5033459a226da0", size = 3144253 },
+    { url = "https://files.pythonhosted.org/packages/d8/1b/2bd062adeb7c7511b847b32e356024980c0ffcf35f28947792c2d8ad2288/tokenizers-0.21.1-cp39-abi3-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:2fdbd4c067c60a0ac7eca14b6bd18a5bebace54eb757c706b47ea93204f7a37c", size = 3398225 },
+    { url = "https://files.pythonhosted.org/packages/8a/63/38be071b0c8e06840bc6046991636bcb30c27f6bb1e670f4f4bc87cf49cc/tokenizers-0.21.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2dd9a0061e403546f7377df940e866c3e678d7d4e9643d0461ea442b4f89e61a", size = 3038874 },
+    { url = "https://files.pythonhosted.org/packages/ec/83/afa94193c09246417c23a3c75a8a0a96bf44ab5630a3015538d0c316dd4b/tokenizers-0.21.1-cp39-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:db9484aeb2e200c43b915a1a0150ea885e35f357a5a8fabf7373af333dcc8dbf", size = 9014448 },
+    { url = "https://files.pythonhosted.org/packages/ae/b3/0e1a37d4f84c0f014d43701c11eb8072704f6efe8d8fc2dcdb79c47d76de/tokenizers-0.21.1-cp39-abi3-musllinux_1_2_armv7l.whl", hash = "sha256:ed248ab5279e601a30a4d67bdb897ecbe955a50f1e7bb62bd99f07dd11c2f5b6", size = 8937877 },
+    { url = "https://files.pythonhosted.org/packages/ac/33/ff08f50e6d615eb180a4a328c65907feb6ded0b8f990ec923969759dc379/tokenizers-0.21.1-cp39-abi3-musllinux_1_2_i686.whl", hash = "sha256:9ac78b12e541d4ce67b4dfd970e44c060a2147b9b2a21f509566d556a509c67d", size = 9186645 },
+    { url = "https://files.pythonhosted.org/packages/5f/aa/8ae85f69a9f6012c6f8011c6f4aa1c96154c816e9eea2e1b758601157833/tokenizers-0.21.1-cp39-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:e5a69c1a4496b81a5ee5d2c1f3f7fbdf95e90a0196101b0ee89ed9956b8a168f", size = 9384380 },
+    { url = "https://files.pythonhosted.org/packages/e8/5b/a5d98c89f747455e8b7a9504910c865d5e51da55e825a7ae641fb5ff0a58/tokenizers-0.21.1-cp39-abi3-win32.whl", hash = "sha256:1039a3a5734944e09de1d48761ade94e00d0fa760c0e0551151d4dd851ba63e3", size = 2239506 },
+    { url = "https://files.pythonhosted.org/packages/e6/b6/072a8e053ae600dcc2ac0da81a23548e3b523301a442a6ca900e92ac35be/tokenizers-0.21.1-cp39-abi3-win_amd64.whl", hash = "sha256:0f0dcbcc9f6e13e675a66d7a5f2f225a736745ce484c1a4e07476a89ccdad382", size = 2435481 },
 ]
 
 [[package]]
@@ -806,13 +1180,13 @@ name = "torch"
 version = "2.6.0+cpu"
 source = { registry = "https://download.pytorch.org/whl/cpu" }
 dependencies = [
-    { name = "filelock" },
-    { name = "fsspec" },
-    { name = "jinja2" },
-    { name = "networkx" },
-    { name = "setuptools" },
-    { name = "sympy" },
-    { name = "typing-extensions" },
+    { name = "filelock", marker = "extra == 'extra-4-yadt-cpu' or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "fsspec", marker = "extra == 'extra-4-yadt-cpu' or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "jinja2", marker = "extra == 'extra-4-yadt-cpu' or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "networkx", marker = "extra == 'extra-4-yadt-cpu' or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "setuptools", marker = "extra == 'extra-4-yadt-cpu' or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "sympy", marker = "extra == 'extra-4-yadt-cpu' or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "typing-extensions", marker = "extra == 'extra-4-yadt-cpu' or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
 ]
 wheels = [
     { url = "https://download.pytorch.org/whl/cpu/torch-2.6.0%2Bcpu-cp313-cp313-linux_x86_64.whl", hash = "sha256:e70ee2e37ad27a90201d101a41c2e10df7cf15a9ebd17c084f54cf2518c57bdf" },
@@ -823,17 +1197,141 @@ wheels = [
 ]
 
 [[package]]
+name = "torch"
+version = "2.6.0+cu118"
+source = { registry = "https://download.pytorch.org/whl/cu118" }
+dependencies = [
+    { name = "filelock", marker = "extra == 'extra-4-yadt-cuda118' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "fsspec", marker = "extra == 'extra-4-yadt-cuda118' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "jinja2", marker = "extra == 'extra-4-yadt-cuda118' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "networkx", marker = "extra == 'extra-4-yadt-cuda118' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cublas-cu11", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda118') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cuda-cupti-cu11", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda118') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cuda-nvrtc-cu11", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda118') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cuda-runtime-cu11", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda118') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cudnn-cu11", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda118') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cufft-cu11", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda118') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-curand-cu11", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda118') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cusolver-cu11", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda118') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cusparse-cu11", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda118') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-nccl-cu11", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda118') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-nvtx-cu11", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda118') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "setuptools", marker = "extra == 'extra-4-yadt-cuda118' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "sympy", marker = "extra == 'extra-4-yadt-cuda118' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "triton", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda118') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "typing-extensions", marker = "extra == 'extra-4-yadt-cuda118' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+]
+wheels = [
+    { url = "https://download.pytorch.org/whl/cu118/torch-2.6.0%2Bcu118-cp313-cp313-linux_x86_64.whl", hash = "sha256:8d30eb2870ffe05d81ec513bdb08c0f2bab9fd1bd4fbc6e5681fad855c7b99e3" },
+    { url = "https://download.pytorch.org/whl/cu118/torch-2.6.0%2Bcu118-cp313-cp313-win_amd64.whl", hash = "sha256:a6bfe22660fb902b5ade933b04c81be7ddc268d1a9f28f843f20c0dee5216edd" },
+    { url = "https://download.pytorch.org/whl/cu118/torch-2.6.0%2Bcu118-cp313-cp313t-linux_x86_64.whl", hash = "sha256:771643a2801e199f5a6f7d07803b5604e82ba44d2db1106ad6cc33788326b8ec" },
+]
+
+[[package]]
+name = "torch"
+version = "2.6.0+cu124"
+source = { registry = "https://download.pytorch.org/whl/cu124" }
+dependencies = [
+    { name = "filelock", marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "fsspec", marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "jinja2", marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "networkx", marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cublas-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cuda-cupti-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cuda-nvrtc-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cuda-runtime-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cudnn-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cufft-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-curand-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cusolver-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cusparse-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-cusparselt-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-nccl-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-nvjitlink-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "nvidia-nvtx-cu12", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "setuptools", marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "sympy", marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "triton", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-cuda124') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "typing-extensions", marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+]
+wheels = [
+    { url = "https://download.pytorch.org/whl/cu124/torch-2.6.0%2Bcu124-cp313-cp313-linux_x86_64.whl", hash = "sha256:0f3bc53c988ce9568cd876a2a5316761e84a8704135ec8068f5f81b4417979cb" },
+    { url = "https://download.pytorch.org/whl/cu124/torch-2.6.0%2Bcu124-cp313-cp313-win_amd64.whl", hash = "sha256:519330eef09534acad8110b6f423d2fe58c1d8e9ada999ed077a637a0021f908" },
+    { url = "https://download.pytorch.org/whl/cu124/torch-2.6.0%2Bcu124-cp313-cp313t-linux_x86_64.whl", hash = "sha256:35cba404c0d742406cdcba1609085874bc60facdfbc50e910c47a92405fef44c" },
+]
+
+[[package]]
+name = "torch"
+version = "2.6.0+rocm6.2.4"
+source = { registry = "https://download.pytorch.org/whl/rocm6.2.4" }
+dependencies = [
+    { name = "filelock", marker = "(extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "fsspec", marker = "(extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "jinja2", marker = "(extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "networkx", marker = "(extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "pytorch-triton-rocm", marker = "(platform_machine == 'x86_64' and sys_platform == 'linux' and extra == 'extra-4-yadt-rocm') or (platform_machine != 'x86_64' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (sys_platform != 'linux' and extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "setuptools", marker = "(extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "sympy", marker = "(extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "typing-extensions", marker = "(extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+]
+wheels = [
+    { url = "https://download.pytorch.org/whl/rocm6.2.4/torch-2.6.0%2Brocm6.2.4-cp313-cp313-manylinux_2_28_x86_64.whl", hash = "sha256:eaa6bcf29e1d54b4bbb2cf421f6ace76b9fe7d84162d50f616de20486802506f" },
+    { url = "https://download.pytorch.org/whl/rocm6.2.4/torch-2.6.0%2Brocm6.2.4-cp313-cp313t-manylinux_2_28_x86_64.whl", hash = "sha256:08c2d1fd8cb14e90c35beac644e585322c532acea0c66f201fab939fe48d4e77" },
+]
+
+[[package]]
 name = "torchvision"
 version = "0.21.0+cpu"
 source = { registry = "https://download.pytorch.org/whl/cpu" }
 dependencies = [
-    { name = "numpy" },
-    { name = "pillow" },
-    { name = "torch" },
+    { name = "numpy", marker = "extra == 'extra-4-yadt-cpu' or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "pillow", marker = "extra == 'extra-4-yadt-cpu' or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "torch", version = "2.6.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "extra == 'extra-4-yadt-cpu' or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
 ]
 wheels = [
     { url = "https://download.pytorch.org/whl/cpu/torchvision-0.21.0%2Bcpu-cp313-cp313-linux_x86_64.whl", hash = "sha256:a76478c0f547e032116282d61a5a7d943142cf040f6c7d97941d7e96813c4c14" },
     { url = "https://download.pytorch.org/whl/cpu/torchvision-0.21.0%2Bcpu-cp313-cp313-win_amd64.whl", hash = "sha256:883f8668b923781f1152a20d75e75ad94a4f1016328d86a7b889006a9156fb14" },
+]
+
+[[package]]
+name = "torchvision"
+version = "0.21.0+cu118"
+source = { registry = "https://download.pytorch.org/whl/cu118" }
+dependencies = [
+    { name = "numpy", marker = "extra == 'extra-4-yadt-cuda118' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "pillow", marker = "extra == 'extra-4-yadt-cuda118' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "torch", version = "2.6.0+cu118", source = { registry = "https://download.pytorch.org/whl/cu118" }, marker = "extra == 'extra-4-yadt-cuda118' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+]
+wheels = [
+    { url = "https://download.pytorch.org/whl/cu118/torchvision-0.21.0%2Bcu118-cp313-cp313-linux_x86_64.whl", hash = "sha256:2e85300054af1feda7213f578039097ec816683a7ef0b6e199be17f70e220a53" },
+    { url = "https://download.pytorch.org/whl/cu118/torchvision-0.21.0%2Bcu118-cp313-cp313-win_amd64.whl", hash = "sha256:c513d44894d09e3b04ff683e71ef3f5503f6d8cdc2b701cad98f4d7eb0c8b570" },
+]
+
+[[package]]
+name = "torchvision"
+version = "0.21.0+cu124"
+source = { registry = "https://download.pytorch.org/whl/cu124" }
+dependencies = [
+    { name = "numpy", marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "pillow", marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+    { name = "torch", version = "2.6.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124" }, marker = "extra == 'extra-4-yadt-cuda124' or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm') or (extra == 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm')" },
+]
+wheels = [
+    { url = "https://download.pytorch.org/whl/cu124/torchvision-0.21.0%2Bcu124-cp313-cp313-linux_x86_64.whl", hash = "sha256:4b70acf3b4b96a0ceb1374116626c9bef9e8be016b57b1284e482260ca1896d6" },
+    { url = "https://download.pytorch.org/whl/cu124/torchvision-0.21.0%2Bcu124-cp313-cp313-win_amd64.whl", hash = "sha256:8fcf55321b206de70ff8e01c884fa42e57a60b1cb749341b96e0f22c8a7c9ec7" },
+]
+
+[[package]]
+name = "torchvision"
+version = "0.21.0+rocm6.2.4"
+source = { registry = "https://download.pytorch.org/whl/rocm6.2.4" }
+dependencies = [
+    { name = "numpy", marker = "(extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "pillow", marker = "(extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+    { name = "torch", version = "2.6.0+rocm6.2.4", source = { registry = "https://download.pytorch.org/whl/rocm6.2.4" }, marker = "(extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda118') or (extra == 'extra-4-yadt-cpu' and extra == 'extra-4-yadt-cuda124') or (extra == 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-cuda124') or (extra != 'extra-4-yadt-cuda124' and extra == 'extra-4-yadt-rocm') or (extra != 'extra-4-yadt-cpu' and extra != 'extra-4-yadt-cuda118' and extra == 'extra-4-yadt-rocm')" },
+]
+wheels = [
+    { url = "https://download.pytorch.org/whl/rocm6.2.4/torchvision-0.21.0%2Brocm6.2.4-cp313-cp313-linux_x86_64.whl", hash = "sha256:a3e3cc942b54a6f0d3f26a402d26e0c9f3e657310558288f7219ccf67adaf7f2" },
 ]
 
 [[package]]
@@ -846,6 +1344,35 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a8/4b/29b4ef32e036bb34e4ab51796dd745cdba7ed47ad142a9f4a1eb8e0c744d/tqdm-4.67.1.tar.gz", hash = "sha256:f8aef9c52c08c13a65f30ea34f4e5aac3fd1a34959879d7e59e63027286627f2", size = 169737 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d0/30/dc54f88dd4a2b5dc8a0279bdd7270e735851848b762aeb1c1184ed1f6b14/tqdm-4.67.1-py3-none-any.whl", hash = "sha256:26445eca388f82e72884e0d580d5464cd801a3ea01e63e5601bdff9ba6a48de2", size = 78540 },
+]
+
+[[package]]
+name = "transformers"
+version = "4.50.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "filelock" },
+    { name = "huggingface-hub" },
+    { name = "numpy" },
+    { name = "packaging" },
+    { name = "pyyaml" },
+    { name = "regex" },
+    { name = "requests" },
+    { name = "safetensors" },
+    { name = "tokenizers" },
+    { name = "tqdm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c0/29/37877123d6633a188997d75dc17d6f526745d63361794348ce748db23d49/transformers-4.50.3.tar.gz", hash = "sha256:1d795d24925e615a8e63687d077e4f7348c2702eb87032286eaa76d83cdc684f", size = 8774363 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/aa/22/733a6fc4a6445d835242f64c490fdd30f4a08d58f2b788613de3f9170692/transformers-4.50.3-py3-none-any.whl", hash = "sha256:6111610a43dec24ef32c3df0632c6b25b07d9711c01d9e1077bdd2ff6b14a38c", size = 10180411 },
+]
+
+[[package]]
+name = "triton"
+version = "3.2.0"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c7/30/37a3384d1e2e9320331baca41e835e90a3767303642c7a80d4510152cbcf/triton-3.2.0-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e5dfa23ba84541d7c0a531dfce76d8bcd19159d50a4a8b14ad01e91734a5c1b0", size = 253154278 },
 ]
 
 [[package]]
@@ -922,3 +1449,81 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/14/13/8b7fc4cb551b9cfd9890f0fd66e53c18a06240319915533b033a56a3d520/websockets-14.2-cp313-cp313-win_amd64.whl", hash = "sha256:b439ea828c4ba99bb3176dc8d9b933392a2413c0f6b149fdcba48393f573377f", size = 164420 },
     { url = "https://files.pythonhosted.org/packages/7b/c8/d529f8a32ce40d98309f4470780631e971a5a842b60aec864833b3615786/websockets-14.2-py3-none-any.whl", hash = "sha256:7a6ceec4ea84469f15cf15807a747e9efe57e369c384fa86e022b3bea679b79b", size = 157416 },
 ]
+
+[[package]]
+name = "yadt"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "gradio" },
+    { name = "huggingface-hub" },
+    { name = "pillow" },
+]
+
+[package.optional-dependencies]
+cpu = [
+    { name = "einops" },
+    { name = "onnxruntime" },
+    { name = "timm" },
+    { name = "torch", version = "2.6.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" } },
+    { name = "torchvision", version = "0.21.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" } },
+    { name = "transformers" },
+]
+cuda118 = [
+    { name = "einops" },
+    { name = "onnxruntime-gpu" },
+    { name = "timm" },
+    { name = "torch", version = "2.6.0+cu118", source = { registry = "https://download.pytorch.org/whl/cu118" } },
+    { name = "torchvision", version = "0.21.0+cu118", source = { registry = "https://download.pytorch.org/whl/cu118" } },
+    { name = "transformers" },
+]
+cuda124 = [
+    { name = "einops" },
+    { name = "onnxruntime-gpu" },
+    { name = "timm" },
+    { name = "torch", version = "2.6.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124" } },
+    { name = "torchvision", version = "0.21.0+cu124", source = { registry = "https://download.pytorch.org/whl/cu124" } },
+    { name = "transformers" },
+]
+rocm = [
+    { name = "einops" },
+    { name = "onnxruntime-gpu" },
+    { name = "pytorch-triton-rocm" },
+    { name = "timm" },
+    { name = "torch", version = "2.6.0+rocm6.2.4", source = { registry = "https://download.pytorch.org/whl/rocm6.2.4" } },
+    { name = "torchvision", version = "0.21.0+rocm6.2.4", source = { registry = "https://download.pytorch.org/whl/rocm6.2.4" } },
+    { name = "transformers" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "einops", marker = "extra == 'cpu'", specifier = ">=0.8.1" },
+    { name = "einops", marker = "extra == 'cuda118'", specifier = ">=0.8.1" },
+    { name = "einops", marker = "extra == 'cuda124'", specifier = ">=0.8.1" },
+    { name = "einops", marker = "extra == 'rocm'", specifier = ">=0.8.1" },
+    { name = "gradio", specifier = ">=5.16.1" },
+    { name = "huggingface-hub", specifier = ">=0.29.0" },
+    { name = "onnxruntime", marker = "extra == 'cpu'", specifier = ">=1.12.0" },
+    { name = "onnxruntime-gpu", marker = "extra == 'cuda118'", specifier = ">=1.12.0" },
+    { name = "onnxruntime-gpu", marker = "extra == 'cuda124'", specifier = ">=1.12.0" },
+    { name = "onnxruntime-gpu", marker = "extra == 'rocm'", specifier = ">=1.12.0" },
+    { name = "pillow", specifier = ">=9.0.0" },
+    { name = "pytorch-triton-rocm", marker = "extra == 'rocm'", specifier = "==3.2.0", index = "https://download.pytorch.org/whl/rocm6.2.4", conflict = { package = "yadt", extra = "rocm" } },
+    { name = "timm", marker = "extra == 'cpu'", specifier = "==1.0.15" },
+    { name = "timm", marker = "extra == 'cuda118'", specifier = "==1.0.15" },
+    { name = "timm", marker = "extra == 'cuda124'", specifier = "==1.0.15" },
+    { name = "timm", marker = "extra == 'rocm'", specifier = "==1.0.15" },
+    { name = "torch", marker = "extra == 'cpu'", specifier = "==2.6.0+cpu", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "yadt", extra = "cpu" } },
+    { name = "torch", marker = "extra == 'cuda118'", specifier = "==2.6.0", index = "https://download.pytorch.org/whl/cu118", conflict = { package = "yadt", extra = "cuda118" } },
+    { name = "torch", marker = "extra == 'cuda124'", specifier = "==2.6.0", index = "https://download.pytorch.org/whl/cu124", conflict = { package = "yadt", extra = "cuda124" } },
+    { name = "torch", marker = "extra == 'rocm'", specifier = "==2.6.0", index = "https://download.pytorch.org/whl/rocm6.2.4", conflict = { package = "yadt", extra = "rocm" } },
+    { name = "torchvision", marker = "extra == 'cpu'", specifier = "==0.21.0+cpu", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "yadt", extra = "cpu" } },
+    { name = "torchvision", marker = "extra == 'cuda118'", specifier = "==0.21.0", index = "https://download.pytorch.org/whl/cu118", conflict = { package = "yadt", extra = "cuda118" } },
+    { name = "torchvision", marker = "extra == 'cuda124'", specifier = "==0.21.0", index = "https://download.pytorch.org/whl/cu124", conflict = { package = "yadt", extra = "cuda124" } },
+    { name = "torchvision", marker = "extra == 'rocm'", specifier = "==0.21.0", index = "https://download.pytorch.org/whl/rocm6.2.4", conflict = { package = "yadt", extra = "rocm" } },
+    { name = "transformers", marker = "extra == 'cpu'", specifier = ">=4.38.0" },
+    { name = "transformers", marker = "extra == 'cuda118'", specifier = ">=4.38.0" },
+    { name = "transformers", marker = "extra == 'cuda124'", specifier = ">=4.38.0" },
+    { name = "transformers", marker = "extra == 'rocm'", specifier = ">=4.38.0" },
+]
+provides-extras = ["cpu", "cuda118", "cuda124", "rocm"]

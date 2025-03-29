@@ -1,0 +1,8 @@
+--extra-index-url https://download.pytorch.org/whl/cu118
+
+# camie
+torch==2.6.0
+torchvision==0.21.0
+
+# smilingwolf
+onnxruntime-gpu>=1.12.0
