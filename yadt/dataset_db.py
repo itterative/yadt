@@ -119,6 +119,11 @@ class _db:
             create index idx_dataset_history_dataset_id on dataset_history (dataset_id);
         """)
 
+        self._do_migration("dataset_cache_v2", """
+            drop index if exists idx_dataset_cache_repo_name;
+            create unique index if not exists idx_dataset_cache_repo_name on dataset_cache (repo_name, hash_id);
+        """)
+
     def get_recent_datasets(self) -> list[str]:
         with self._conn() as conn:
             cursor = conn.cursor()
