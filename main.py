@@ -20,6 +20,8 @@ def parse_args() -> argparse.Namespace:
 
 
 def main():
+    import tempfile
+
     from yadt import ui_image, ui_dataset, ui_misc
 
     args = parse_args()
@@ -33,25 +35,30 @@ def main():
 
     print('* Using device:', args.device)
 
-    with gr.Blocks(title=TITLE) as demo:
-        with gr.Column():
-            gr.Markdown(
-                value=f"<h1 style='text-align: center; margin-bottom: 1rem'>{TITLE}</h1>"
-            )
-            gr.Markdown(value=DESCRIPTION)
+    with tempfile.TemporaryDirectory(suffix='-yadt') as tempfolder:
+        print('* Using temporary folder:', tempfolder)
 
-            with gr.Tabs():
-                with gr.Tab(label="Image"):
-                    ui_image.ui(args)
+        args.tempfolder = tempfolder
 
-                with gr.Tab(label="Dataset"):
-                    ui_dataset.ui(args)
+        with gr.Blocks(title=TITLE) as demo:
+            with gr.Column():
+                gr.Markdown(
+                    value=f"<h1 style='text-align: center; margin-bottom: 1rem'>{TITLE}</h1>"
+                )
+                gr.Markdown(value=DESCRIPTION)
 
-                with gr.Tab(label="Miscellaneous"):
-                    ui_misc.ui(args)
+                with gr.Tabs():
+                    with gr.Tab(label="Image"):
+                        ui_image.ui(args)
 
-    demo.queue(max_size=10)
-    demo.launch(server_name=args.host, server_port=args.port)
+                    with gr.Tab(label="Dataset"):
+                        ui_dataset.ui(args)
+
+                    with gr.Tab(label="Miscellaneous"):
+                        ui_misc.ui(args)
+
+        demo.queue(max_size=10)
+        demo.launch(server_name=args.host, server_port=args.port, allowed_paths=[tempfolder])
 
 
 if __name__ == "__main__":

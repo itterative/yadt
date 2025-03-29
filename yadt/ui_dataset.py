@@ -7,13 +7,30 @@ from yadt import tagger_shared
 from yadt import process_prediction
 from yadt import ui_utils
 
+def temp_folder_gallery_path(args, name: str):
+    return f'{args.tempfolder}/{name}.jpeg'
+
 def process_dataset_folder(args):
     import zlib
     import pickle
+    import hashlib
 
     from yadt.dataset_db import db
 
-    warning_default = [ None, {}, {}, {}, {} ]
+
+    def hash_file(path: str):
+        with open(path, 'rb') as f:
+            hash = hashlib.sha256(f.read())
+            return hash.digest()
+
+    def encode_results(*args):
+        return zlib.compress(pickle.dumps(args))
+
+    def decode_results(data: bytes):
+        return pickle.loads(zlib.decompress(data))
+
+
+    warning_default = [ None, {}, [], gr.Column(visible=False), {}, {}, {} ]
 
     @ui_utils.gradio_warning(default=warning_default)
     def _process_dataset_folder(
@@ -38,19 +55,7 @@ def process_dataset_folder(args):
         assert len(folder) > 0, "No folder given"
         assert os.path.isdir(folder), "Folder either doesn't exist or is not a folder"
 
-        def hash_file(path: str):
-            import hashlib
-
-            with open(path, 'rb') as f:
-                hash = hashlib.sha256(f.read())
-                return hash.digest()
-
-        def encode_results(*args):
-            return zlib.compress(pickle.dumps(args))
-
-        def decode_results(data: bytes):
-            return pickle.loads(zlib.decompress(data))
-
+        db.update_recent_datasets(folder)
 
         # predictor.load_model(model_repo)
 
@@ -67,6 +72,7 @@ def process_dataset_folder(args):
             image_path = folder + '/' + file
 
             file_hash = hash_file(image_path)
+            file_hash_hex = file_hash.hex()
             cache = db.get_dataset_cache(file_hash, model_repo)
 
             try:
@@ -97,7 +103,11 @@ def process_dataset_folder(args):
             
             all_count += 1
 
-            all_images.append((image, sorted_general_strings))
+            temp_image_path = temp_folder_gallery_path(args, file_hash_hex)
+            if not os.path.exists(temp_image_path):
+                image.convert("RGB").save(temp_image_path, quality=85)
+
+            all_images.append((file_hash_hex, sorted_general_strings))
 
             for k in rating.keys():
                 all_rating[k] = all_rating.get(k, 0) + rating[k]
@@ -124,11 +134,11 @@ def process_dataset_folder(args):
         for k in all_general_res.keys():
             all_general_res[k] = all_general_res[k] / all_count
 
-        db.update_recent_datasets(folder)
-
         return [
             gr.Dropdown(choices=load_recent_datasets()),
             all_images,
+            [],
+            gr.Column(visible=True),
             all_rating,
             all_general_res,
             all_character_res,
@@ -136,6 +146,47 @@ def process_dataset_folder(args):
     
     return _process_dataset_folder
 
+def process_dataset_gallery(args):
+    @ui_utils.gradio_warning
+    def _process_dataset_gallery(all_images: list[tuple[str, str]], filters: list[str]):
+        if len(filters) == 0:
+            return [
+                (temp_folder_gallery_path(args, image), image) for image, tags in all_images
+            ]
+        
+        filters = set(filters)
+
+        return [
+            (temp_folder_gallery_path(args, image), image) for image, tags in all_images if set([ tag.strip() for tag in tags.split(',') ]).issuperset(filters)
+        ]
+
+    return _process_dataset_gallery
+
+def process_dataset_gallery_filters(args):
+    @ui_utils.gradio_warning
+    def _process_dataset_gallery(all_images: list[tuple[str, str]]):
+        all_image_dict = {}
+
+        for _, tags in all_images:
+            for tag in tags.split(','):
+                tag = tag.strip()
+
+                if tag in all_image_dict:
+                    all_image_dict[tag] += 1
+                else:
+                    all_image_dict[tag] = 1
+
+        return gr.Dropdown(choices=[
+            tag for tag, _ in sorted(all_image_dict.items(), key=lambda item: item[1], reverse=True)
+        ])
+
+    return _process_dataset_gallery
+
+
+@ui_utils.gradio_warning(default=[])
+def load_recent_datasets():
+    from yadt.dataset_db import db
+    return db.get_recent_datasets()
 
 def load_dataset_settings(args):
     model_repo_default = tagger_shared.default_repo
@@ -238,10 +289,6 @@ def save_dataset_settings(args):
 
     return _save_dataset_settings
 
-@ui_utils.gradio_warning(default=[])
-def load_recent_datasets():
-    from yadt.dataset_db import db
-    return db.get_recent_datasets()
 
 def ui(args):
     with gr.Blocks() as page:
@@ -349,21 +396,22 @@ def ui(args):
 
             with gr.Column():
                 with gr.Column(variant="panel"):
-                    gallery = gr.Gallery(interactive=False, columns=4)
-                    gallery_tags = gr.Text(lines=4, interactive=False, show_label=False, container=False, placeholder="Select an image to view the resulting tags.")
+                    # FIXME: gr.JSON deals stateless requests, but it also sends all the captions over
+                    gallery_cache = gr.JSON(visible=False)
+                    gallery_selection = gr.JSON(visible=False)
 
-                    def on_gallery_select(event: gr.SelectData):
-                        return event.value['caption']
+                    with gr.Column(visible=False) as gallery_tags_filter:
+                        gr.HTML('<h3>Dataset gallery</h3><p><i>Use the dropdown below to filter the images by tags</i></p>')
+                        gallery_tags_filter_dropdown = gr.Dropdown(choices=['1girl', '2girls'], label="Filter by tag", multiselect=True, interactive=True, show_label=False, container=False)
 
-                    gallery.select(
-                        on_gallery_select,
-                        outputs=gallery_tags,
-                    )
+                    gallery = gr.Gallery(interactive=False, columns=3)
 
-                    gallery.preview_close(
-                        lambda *args: None,
-                        outputs=gallery_tags,
-                    )
+                    with gr.Column(visible=False) as gallery_tags_view:
+                        gallery_tags = gr.Text(interactive=False, show_label=False, container=False, placeholder="Select an image to view the resulting tags.")
+
+                        with gr.Row():
+                            gallery_tags_reset = gr.Button(value="Reset")
+                            gallery_tags_save = gr.Button(value="Save", variant="primary")
 
                 with gr.Column(variant="panel"):
                     rating = gr.Label(label="Rating")
@@ -399,11 +447,74 @@ def ui(args):
         ],
         outputs=[
             folder,
-            gallery,
+            gallery_cache,
+            gallery_selection,
+            gallery_tags_filter,
             rating,
             general_res,
             character_res,
         ],
+    )
+
+    gallery_cache.change(
+        process_dataset_gallery_filters(args),
+        inputs=[gallery_cache],
+        outputs=[gallery_tags_filter_dropdown],
+    )
+
+    gallery_cache.change(
+        process_dataset_gallery(args),
+        inputs=[gallery_cache, gallery_tags_filter_dropdown],
+        outputs=[gallery],
+    )
+
+    gallery_tags_filter_dropdown.change(
+        process_dataset_gallery(args),
+        inputs=[gallery_cache, gallery_tags_filter_dropdown],
+        outputs=[gallery],
+    )
+
+    def on_gallery_select(all_images: list[tuple[str, str]], event: gr.SelectData):
+        selection = event.value['caption']
+        caption = next(filter(lambda image: image[0] == selection, all_images), [None, None])[1]
+
+        assert caption is not None, f"Could not find caption for the selected image: {selection}"
+
+        return [
+            gr.Text(value=caption, interactive=True),
+            gr.Column(visible=True),
+            [selection],
+        ]
+
+    def on_gallery_deselect():
+        return [
+            gr.Text(value=None, interactive=False),
+            gr.Column(visible=False),
+            [],
+        ]
+    
+    def on_gallery_reset(selection: list[str], all_images: list[tuple[str, str]]):
+        if len(selection) == 0:
+            return None
+
+        selection = selection[0]
+        return next(filter(lambda image: image[0] == selection, all_images), [None, None])[1]
+
+    gallery.select(
+        on_gallery_select,
+        inputs=[gallery_cache],
+        outputs=[gallery_tags, gallery_tags_view, gallery_selection],
+    )
+
+    gallery.preview_close(
+        on_gallery_deselect,
+        outputs=[gallery_tags, gallery_tags_view, gallery_selection],
+    )
+
+    gallery_tags_reset.click(
+        on_gallery_reset,
+        inputs=[gallery_selection, gallery_cache],
+        outputs=[gallery_tags],
     )
 
     dataset_settings = [
