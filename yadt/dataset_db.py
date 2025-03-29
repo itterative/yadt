@@ -124,6 +124,20 @@ class _db:
             create unique index if not exists idx_dataset_cache_repo_name on dataset_cache (repo_name, hash_id);
         """)
 
+        self._do_migration("dataset_manual_editing", """
+            create table if not exists dataset_manual_edit (
+                id integer primary key,
+                dataset_id integer not null,
+                hash_id integer not null,
+                previous_edit text not null,
+                new_edit text not null,
+                foreign key (dataset_id) references dataset_stats (id) on delete cascade,
+                foreign key (hash_id) references dataset_file_hash (id) on delete cascade
+            );
+
+            create unique index idx_dataset_manual_edit_id on dataset_manual_edit (dataset_id, hash_id);
+        """)
+
     def get_recent_datasets(self) -> list[str]:
         with self._conn() as conn:
             cursor = conn.cursor()
@@ -285,7 +299,46 @@ class _db:
             except sqlite3.Error as e:
                 conn.rollback()
                 raise Exception("failed to update dataset cache") from e
-            
+    
+    def get_dataset_edit(self, dataset: str, hash: bytes):
+        with self._conn() as conn:
+            cursor = conn.cursor()
+
+            rows = cursor.execute('select e.previous_edit, e.new_edit from dataset_manual_edit e left join dataset_stats s on s.id = e.dataset_id left join dataset_file_hash h on h.id = e.hash_id where s.dataset = ? and h.hash = ? limit 1', (dataset, hash)).fetchall()
+            if len(rows) == 0:
+                return None
+
+            return str(rows[0][0]), str(rows[0][1])
+
+    def set_dataset_edit(self, dataset: str, hash: bytes, previous_edit: str, new_edit: str):
+        import sqlite3
+
+        with self._conn() as conn:
+            cursor = conn.cursor()
+
+            try:
+                try:
+                    rows = cursor.execute('insert or abort into dataset_stats (dataset) values (?) returning id', (dataset,)).fetchall()
+                    conn.commit()
+                except sqlite3.IntegrityError:
+                    rows = cursor.execute('select id from dataset_stats where dataset = ?', (dataset,)).fetchall()
+
+                dataset_id = int(rows[0][0])
+
+                try:
+                    rows = cursor.execute('insert or abort into dataset_file_hash (hash) values (?) returning id', (hash,)).fetchall()
+                    conn.commit()
+                except sqlite3.IntegrityError:
+                    rows = cursor.execute('select id from dataset_file_hash where hash = ?', (hash,)).fetchall()
+
+                hash_id = int(rows[0][0])
+
+                cursor.execute('insert or replace into dataset_manual_edit (dataset_id, hash_id, previous_edit, new_edit) values (?, ?, ?, ?)', (dataset_id, hash_id, previous_edit, new_edit))
+                conn.commit()
+            except sqlite3.Error as e:
+                conn.rollback()
+                raise Exception("failed to update dataset cache") from e
+
     def vacuum(self):
         import sqlite3
 

@@ -294,3 +294,57 @@ def post_process_prediction(
     general_res = [ (k, v) for k, v in tag_res if k in general_tags ]
 
     return tag_string, dict(rating), dict(general_res), dict(character_res)
+
+def post_process_manual_edits(
+        initial_tags: str,
+        edited_tags: str,
+        new_tags: str,
+):
+    import difflib
+
+    def merge_diff(initial, diff):
+        updated = list(initial)
+        diff = [ (i, tag_diff[:2], tag_diff[2:]) for i, tag_diff in enumerate(diff)]
+
+        for i, op, tag in diff:
+            if op == '+ ':
+                # skip if already exists
+                # FIXME: what if tags are duplicated?
+                try:
+                    updated.index(tag)
+                    continue
+                except ValueError:
+                    pass
+
+                # print('adding', i, tag)
+
+                # find where tag should be inserted at
+                tag_i = i
+                for j in range(i-1, -1, -1):
+                    # print('  try', j, x2[j][2:], x)
+                    try:
+                        tag_i = updated.index(diff[j][2])
+                        # print('  found', xi)
+                        break
+                    except ValueError:
+                        continue
+
+                # insert tag in appropriate place
+                tag_i = min(len(updated), tag_i)
+                updated.insert(tag_i+1, tag)
+            elif op == '- ':
+                # print('removing', i, tag)
+                try:
+                    updated.remove(tag)
+                except ValueError:
+                    pass
+
+        return updated
+    
+    initial_tags = [tag.strip() for tag in initial_tags.split(',')]
+    edited_tags = [tag.strip() for tag in edited_tags.split(',')]
+    new_tags = [tag.strip() for tag in new_tags.split(',')]
+
+    diff = list(difflib.ndiff(initial_tags, edited_tags))
+
+    return ', '.join(merge_diff(new_tags, diff))

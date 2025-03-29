@@ -10,6 +10,14 @@ from yadt import ui_utils
 def temp_folder_gallery_path(args, name: str):
     return f'{args.tempfolder}/{name}.jpeg'
 
+def save_caption_for_image_path(image_path: str, caption: str, overwrite_current_caption: bool = False):
+    caption_file_path = image_path[:image_path.rindex('.')] + '.txt'
+
+    if not os.path.exists(caption_file_path) or overwrite_current_caption:
+        with open(caption_file_path, 'w') as f:
+            f.write(caption)
+
+
 def process_dataset_folder(args):
     import zlib
     import pickle
@@ -51,6 +59,7 @@ def process_dataset_folder(args):
             progress = gr.Progress(),
     ):
         warning_default[0] = folder
+        warning_default[2] = [folder, None]
 
         assert len(folder) > 0, "No folder given"
         assert os.path.isdir(folder), "Folder either doesn't exist or is not a folder"
@@ -97,6 +106,13 @@ def process_dataset_folder(args):
                     prefix_tags, keep_tags, ban_tags, map_tags,
                 )
             
+            manual_edit = db.get_dataset_edit(folder, file_hash)
+            if manual_edit is not None:
+                previous_edit, new_edit = manual_edit
+                sorted_general_strings_post = process_prediction.post_process_manual_edits(previous_edit, new_edit, sorted_general_strings)
+            else:
+                sorted_general_strings_post = sorted_general_strings
+            
             # print('===', file)
             # print(sorted_general_strings)
             # print('')
@@ -107,7 +123,7 @@ def process_dataset_folder(args):
             if not os.path.exists(temp_image_path):
                 image.convert("RGB").save(temp_image_path, quality=85)
 
-            all_images.append((file_hash_hex, sorted_general_strings))
+            all_images.append((file_hash_hex, [image_path, sorted_general_strings, sorted_general_strings_post]))
 
             for k in rating.keys():
                 all_rating[k] = all_rating.get(k, 0) + rating[k]
@@ -118,12 +134,7 @@ def process_dataset_folder(args):
             for k in general_res.keys():
                 all_general_res[k] = all_general_res.get(k, 0) + 1
 
-            caption_file = file[:file.rindex('.')] + '.txt'
-            caption_file_path = folder + '/' + caption_file
-
-            if not os.path.exists(caption_file_path) or overwrite_current_caption:
-                with open(folder + '/' + caption_file, 'w') as f:
-                    f.write(sorted_general_strings)
+            save_caption_for_image_path(image_path, sorted_general_strings_post, overwrite_current_caption=overwrite_current_caption)
 
         for k in all_rating.keys():
             all_rating[k] = all_rating[k] / all_count
@@ -137,7 +148,7 @@ def process_dataset_folder(args):
         return [
             gr.Dropdown(choices=load_recent_datasets()),
             all_images,
-            [],
+            [folder, None],
             gr.Column(visible=True),
             all_rating,
             all_general_res,
@@ -148,7 +159,7 @@ def process_dataset_folder(args):
 
 def process_dataset_gallery(args):
     @ui_utils.gradio_warning
-    def _process_dataset_gallery(all_images: list[tuple[str, str]], filters: list[str]):
+    def _process_dataset_gallery(all_images: list[tuple[str, tuple[str, str, str]]], filters: list[str]):
         if len(filters) == 0:
             return [
                 (temp_folder_gallery_path(args, image), image) for image, tags in all_images
@@ -157,17 +168,17 @@ def process_dataset_gallery(args):
         filters = set(filters)
 
         return [
-            (temp_folder_gallery_path(args, image), image) for image, tags in all_images if set([ tag.strip() for tag in tags.split(',') ]).issuperset(filters)
+            (temp_folder_gallery_path(args, image), image) for image, (_, _, tags) in all_images if set([ tag.strip() for tag in tags.split(',') ]).issuperset(filters)
         ]
 
     return _process_dataset_gallery
 
 def process_dataset_gallery_filters(args):
     @ui_utils.gradio_warning
-    def _process_dataset_gallery(all_images: list[tuple[str, str]]):
+    def _process_dataset_gallery(all_images: list[tuple[str, tuple[str, str, str]]]):
         all_image_dict = {}
 
-        for _, tags in all_images:
+        for _, (_, _, tags) in all_images:
             for tag in tags.split(','):
                 tag = tag.strip()
 
@@ -407,11 +418,14 @@ def ui(args):
                     gallery = gr.Gallery(interactive=False, columns=3)
 
                     with gr.Column(visible=False) as gallery_tags_view:
-                        gallery_tags = gr.Text(interactive=False, show_label=False, container=False, placeholder="Select an image to view the resulting tags.")
+                        gallery_tags_edit = gr.Text(interactive=False, show_label=False, container=False, placeholder="Select an image to view the resulting tags.")
 
                         with gr.Row():
                             gallery_tags_reset = gr.Button(value="Reset")
+                            gallery_tags_reload = gr.Button(value="Reload")
                             gallery_tags_save = gr.Button(value="Save", variant="primary")
+
+                        gr.HTML('<p>Editing dataset tags is still <i><b>experimental</b></i>.</p><p style="font-size: 0.9em"><i><b>Reset</b> will clear any changes made previously, and set the tags back to the original model tags (using the rules set on the left side). <br> <b>Reload</b> will clear any temporary manual changes and load the latest modified tags from the local database. <br> <b>Save</b> will update the database and the caption file. Neither reset nor reload will update the database or caption file until the save button is clicked.</i></p>')
 
                 with gr.Column(variant="panel"):
                     rating = gr.Label(label="Rating")
@@ -474,47 +488,93 @@ def ui(args):
         outputs=[gallery],
     )
 
-    def on_gallery_select(all_images: list[tuple[str, str]], event: gr.SelectData):
-        selection = event.value['caption']
-        caption = next(filter(lambda image: image[0] == selection, all_images), [None, None])[1]
+    def on_gallery_select(selection: tuple[str, str], all_images: list[tuple[str, tuple[str, str, str]]], event: gr.SelectData):
+        _selection = event.value['caption']
+        caption = next(filter(lambda image: image[0] == _selection, all_images), [None, [None, None, None]])[1][2]
 
-        assert caption is not None, f"Could not find caption for the selected image: {selection}"
+        assert caption is not None, f"Could not find caption for the selected image: {_selection}"
 
         return [
             gr.Text(value=caption, interactive=True),
             gr.Column(visible=True),
-            [selection],
+            [selection[0], _selection],
         ]
 
-    def on_gallery_deselect():
+    def on_gallery_deselect(selection: tuple[str, str]):
         return [
             gr.Text(value=None, interactive=False),
             gr.Column(visible=False),
-            [],
+            [selection[0], None],
         ]
     
-    def on_gallery_reset(selection: list[str], all_images: list[tuple[str, str]]):
-        if len(selection) == 0:
+    def on_gallery_reset(selection: tuple[str, str], all_images: list[tuple[str, tuple[str, str, str]]]):
+        if selection[1] is None:
             return None
 
-        selection = selection[0]
-        return next(filter(lambda image: image[0] == selection, all_images), [None, None])[1]
+        selection = selection[1]
+        return next(filter(lambda image: image[0] == selection, all_images), [None, [None, None, None]])[1][1]
+    
+    def on_gallery_reload(selection: tuple[str, str], all_images: list[tuple[str, tuple[str, str, str]]]):
+        if selection[1] is None:
+            return None
+
+        selection = selection[1]
+        return next(filter(lambda image: image[0] == selection, all_images), [None, [None, None, None]])[1][2]
+
+    @ui_utils.gradio_warning
+    def on_gallery_save(selection: tuple[str, str], all_images: list[tuple[str, tuple[str, str, str]]], caption: str):
+        from yadt.dataset_db import db
+
+        assert len(selection) > 0, "No gallery image selected"
+
+        folder, selection = selection
+        gallery_item = next(filter(lambda image: image[0] == selection, all_images), [None, [None, None, None]])
+
+        assert gallery_item[0] is not None, f"Could not find selected image: {selection}"
+
+        file_hash_hex = gallery_item[0]
+        file_hash = bytes.fromhex(file_hash_hex)
+        image_path, initial_edit, _ = gallery_item[1]
+
+        save_caption_for_image_path(image_path, caption, overwrite_current_caption=True)
+        db.set_dataset_edit(folder, file_hash, initial_edit, caption)
+
+        try:
+            all_images_i = list(map(lambda i: i[0], all_images)).index(file_hash_hex)
+            all_images[all_images_i] = [file_hash_hex, [image_path, initial_edit, caption]]
+        except ValueError:
+            gr.Warning(f'Could not update caption for selected image: {selection}')
+
+        return all_images
 
     gallery.select(
         on_gallery_select,
-        inputs=[gallery_cache],
-        outputs=[gallery_tags, gallery_tags_view, gallery_selection],
+        inputs=[gallery_selection, gallery_cache],
+        outputs=[gallery_tags_edit, gallery_tags_view, gallery_selection],
     )
 
     gallery.preview_close(
         on_gallery_deselect,
-        outputs=[gallery_tags, gallery_tags_view, gallery_selection],
+        inputs=[gallery_selection],
+        outputs=[gallery_tags_edit, gallery_tags_view, gallery_selection],
     )
 
     gallery_tags_reset.click(
         on_gallery_reset,
         inputs=[gallery_selection, gallery_cache],
-        outputs=[gallery_tags],
+        outputs=[gallery_tags_edit],
+    )
+
+    gallery_tags_reload.click(
+        on_gallery_reload,
+        inputs=[gallery_selection, gallery_cache],
+        outputs=[gallery_tags_edit],
+    )
+
+    gallery_tags_save.click(
+        on_gallery_save,
+        inputs=[gallery_selection, gallery_cache, gallery_tags_edit],
+        outputs=[gallery_cache],
     )
 
     dataset_settings = [
