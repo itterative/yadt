@@ -62,7 +62,7 @@ def process_dataset_folder(
         cache = db.get_dataset_cache(file_hash, model_repo)
 
         try:
-            image = Image.open(image_path).convert("RGBA")
+            image = Image.open(image_path)
         except Exception as e:
             continue
 

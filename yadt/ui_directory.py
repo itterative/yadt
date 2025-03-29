@@ -34,7 +34,7 @@ def predict_folder(
     
     for index, file in progress.tqdm(list(enumerate(files))):
         try:
-            image = Image.open(folder + '/' + file).convert("RGBA")
+            image = Image.open(folder + '/' + file)
         except Exception as e:
             continue
 

@@ -3,7 +3,7 @@ from typing import Tuple, Dict, List
 import numpy as np
 
 # https://github.com/toriato/stable-diffusion-webui-wd14-tagger/blob/a9eacb1eff904552d3012babfa28b57e1d3e295c/tagger/ui.py#L368
-kaomojis = [
+kaomojis = {
     "0_0",
     "(o)_(o)",
     "+_+",
@@ -23,7 +23,7 @@ kaomojis = [
     "x_x",
     "|_|",
     "||_||",
-]
+}
 
 def post_process_prediction(
         rating: Dict[str, float],
@@ -65,10 +65,9 @@ def post_process_prediction(
         if not replace_underscores:
             return tags
 
-        tags_new = []
-        for tag, prob in tags:
-            tags_new.append([ tag.replace('_', ' ') if tag not in kaomojis else tag, prob])
-        return tags_new
+        return [
+            [ tag.replace('_', ' ') if tag not in kaomojis else tag, prob] for tag, prob in tags
+        ]
 
     def _generate_string(character_res: List[Tuple[str, float]], general_res: List[Tuple[str, float]]):
         character_res = character_res
@@ -81,7 +80,6 @@ def post_process_prediction(
         sorted_tags = _keep_tokens(sorted_tags)
         sorted_tags = _prefix_tokens(sorted_tags)
         sorted_tags = _ban_tokens(sorted_tags)
-        sorted_tags = _replace_underscore(sorted_tags)
         sorted_tags = sorted(sorted_tags, key=lambda x: x[1], reverse=True)
 
         sorted_tags = list(map(lambda x: x[0], sorted_tags))
@@ -290,7 +288,6 @@ def post_process_prediction(
     tag_res = sorted(tag_res, key=lambda x: x[1], reverse=True)
     tag_res = _map_tokens(tag_res)
     tag_res = _ban_tokens(tag_res)
-    tag_res = _replace_underscore(tag_res)
     tag_res = sorted(tag_res, key=lambda x: x[1], reverse=True)
 
     character_res = [ (k, v) for k, v in tag_res if k in character_tags ]
