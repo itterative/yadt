@@ -110,14 +110,15 @@ def ui(args):
             gr.HTML(value = f'<h3>Database statistics</h3>')
 
             with gr.Column(variant="panel"):
+                gr.HTML('<p>Cache usage by model</p>')
                 cache_usage_by_model = gr.DataFrame(
-                    label="Cache usage by model",
                     headers=['Model', 'Usage'],
                     value=dataset_cache_usage_for_repo_name(),
                 )
 
+            with gr.Column(variant="panel"):
+                gr.HTML('<p>Cache usage by dataset</p><p style="font-size: 0.8em"><i>Caches might be shared between datasets, so total cache usage might be lower</i></p>')
                 cache_usage_by_dataset = gr.DataFrame(
-                    label="Cache usage by dataset",
                     headers=['Dataset', 'Usage'],
                     value=dataset_cache_usage_for_dataset(),
                 )
