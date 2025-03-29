@@ -7,144 +7,179 @@ from yadt import tagger_shared
 from yadt import process_prediction
 from yadt import ui_utils
 
-@ui_utils.gradio_error
-def process_dataset_folder(
-        folder: str,
-        model_repo: str,
-        general_thresh: float,
-        # general_mcut_enabled: bool,
-        character_thresh: float,
-        # character_mcut_enabled: bool,
-        replace_underscores: bool,
-        trim_general_tag_dupes: bool,
-        escape_brackets: bool,
-        overwrite_current_caption: bool,
-        prefix_tags: str,
-        keep_tags: str,
-        ban_tags: str,
-        map_tags: str,
-        progress = gr.Progress(),
-):
+def process_dataset_folder(args):
     import zlib
     import pickle
 
     from yadt.dataset_db import db
+
+    warning_default = [ None, {}, {}, {}, {} ]
+
+    @ui_utils.gradio_warning(default=warning_default)
+    def _process_dataset_folder(
+            folder: str,
+            model_repo: str,
+            general_thresh: float,
+            # general_mcut_enabled: bool,
+            character_thresh: float,
+            # character_mcut_enabled: bool,
+            replace_underscores: bool,
+            trim_general_tag_dupes: bool,
+            escape_brackets: bool,
+            overwrite_current_caption: bool,
+            prefix_tags: str,
+            keep_tags: str,
+            ban_tags: str,
+            map_tags: str,
+            progress = gr.Progress(),
+    ):
+        warning_default[0] = folder
+
+        def hash_file(path: str):
+            import hashlib
+
+            with open(path, 'rb') as f:
+                hash = hashlib.sha256(f.read())
+                return hash.digest()
+
+        def encode_results(*args):
+            return zlib.compress(pickle.dumps(args))
+
+        def decode_results(data: bytes):
+            return pickle.loads(zlib.decompress(data))
+
+
+        # predictor.load_model(model_repo)
+
+        files = os.listdir(folder)
+        files = list(filter(lambda f: not f.endswith('.txt') and not f.endswith('.npz') and not f.endswith('.json'), files))
+
+        all_count = 0
+        all_images = []
+        all_rating = dict()
+        all_character_res = dict()
+        all_general_res = dict()
+
+        for index, file in progress.tqdm(list(enumerate(files)), desc=folder):
+            image_path = folder + '/' + file
+
+            file_hash = hash_file(image_path)
+            cache = db.get_dataset_cache(file_hash, model_repo)
+
+            try:
+                image = Image.open(image_path)
+            except Exception as e:
+                continue
+
+            if cache is not None:
+                rating, general_res, character_res = decode_results(cache)
+            else:
+                tagger_shared.predictor.load_model(model_repo)
+                rating, general_res, character_res = tagger_shared.predictor.predict(image)
+
+            db.set_dataset_cache(file_hash, model_repo, folder, encode_results(rating, general_res, character_res))
+
+            sorted_general_strings, rating, general_res, character_res = \
+                process_prediction.post_process_prediction(
+                    rating, general_res, character_res,
+                    # general_thresh, general_mcut_enabled, character_thresh, character_mcut_enabled,
+                    general_thresh, False, character_thresh, False,
+                    replace_underscores, trim_general_tag_dupes, escape_brackets,
+                    prefix_tags, keep_tags, ban_tags, map_tags,
+                )
+            
+            # print('===', file)
+            # print(sorted_general_strings)
+            # print('')
+            
+            all_count += 1
+
+            all_images.append((image, sorted_general_strings))
+
+            for k in rating.keys():
+                all_rating[k] = all_rating.get(k, 0) + rating[k]
+
+            for k in character_res.keys():
+                all_character_res[k] = all_character_res.get(k, 0) + 1
+            
+            for k in general_res.keys():
+                all_general_res[k] = all_general_res.get(k, 0) + 1
+
+            caption_file = file[:file.rindex('.')] + '.txt'
+            caption_file_path = folder + '/' + caption_file
+
+            if not os.path.exists(caption_file_path) or overwrite_current_caption:
+                with open(folder + '/' + caption_file, 'w') as f:
+                    f.write(sorted_general_strings)
+
+        for k in all_rating.keys():
+            all_rating[k] = all_rating[k] / all_count
+
+        for k in all_character_res.keys():
+            all_character_res[k] = all_character_res[k] / all_count
+        
+        for k in all_general_res.keys():
+            all_general_res[k] = all_general_res[k] / all_count
+
+        db.update_recent_datasets(folder)
+
+        return [
+            gr.Dropdown(choices=load_recent_datasets()),
+            all_images,
+            all_rating,
+            all_general_res,
+            all_character_res,
+        ]
     
-    def hash_file(path: str):
-        import hashlib
-
-        with open(path, 'rb') as f:
-            hash = hashlib.sha256(f.read())
-            return hash.digest()
-
-    def encode_results(*args):
-        return zlib.compress(pickle.dumps(args))
-
-    def decode_results(data: bytes):
-        return pickle.loads(zlib.decompress(data))
-
-
-    # predictor.load_model(model_repo)
-
-    files = os.listdir(folder)
-    files = list(filter(lambda f: not f.endswith('.txt') and not f.endswith('.npz') and not f.endswith('.json'), files))
-
-    all_count = 0
-    all_images = []
-    all_rating = dict()
-    all_character_res = dict()
-    all_general_res = dict()
-
-    for index, file in progress.tqdm(list(enumerate(files)), desc=folder):
-        image_path = folder + '/' + file
-
-        file_hash = hash_file(image_path)
-        cache = db.get_dataset_cache(file_hash, model_repo)
-
-        try:
-            image = Image.open(image_path)
-        except Exception as e:
-            continue
-
-        if cache is not None:
-            rating, general_res, character_res = decode_results(cache)
-        else:
-            tagger_shared.predictor.load_model(model_repo)
-            rating, general_res, character_res = tagger_shared.predictor.predict(image)
-
-        db.set_dataset_cache(file_hash, model_repo, folder, encode_results(rating, general_res, character_res))
-
-        sorted_general_strings, rating, general_res, character_res = \
-            process_prediction.post_process_prediction(
-                rating, general_res, character_res,
-                # general_thresh, general_mcut_enabled, character_thresh, character_mcut_enabled,
-                general_thresh, False, character_thresh, False,
-                replace_underscores, trim_general_tag_dupes, escape_brackets,
-                prefix_tags, keep_tags, ban_tags, map_tags,
-            )
-        
-        # print('===', file)
-        # print(sorted_general_strings)
-        # print('')
-        
-        all_count += 1
-
-        all_images.append((image, sorted_general_strings))
-
-        for k in rating.keys():
-            all_rating[k] = all_rating.get(k, 0) + rating[k]
-
-        for k in character_res.keys():
-            all_character_res[k] = all_character_res.get(k, 0) + 1
-        
-        for k in general_res.keys():
-            all_general_res[k] = all_general_res.get(k, 0) + 1
-
-        caption_file = file[:file.rindex('.')] + '.txt'
-        caption_file_path = folder + '/' + caption_file
-
-        if not os.path.exists(caption_file_path) or overwrite_current_caption:
-            with open(folder + '/' + caption_file, 'w') as f:
-                f.write(sorted_general_strings)
-
-    for k in all_rating.keys():
-        all_rating[k] = all_rating[k] / all_count
-
-    for k in all_character_res.keys():
-        all_character_res[k] = all_character_res[k] / all_count
-    
-    for k in all_general_res.keys():
-        all_general_res[k] = all_general_res[k] / all_count
-
-    db.update_recent_datasets(folder)
-
-    return [
-        gr.Dropdown(choices=load_recent_datasets()),
-        all_images,
-        all_rating,
-        all_general_res,
-        all_character_res,
-    ]
+    return _process_dataset_folder
 
 
 def load_dataset_settings(args):
-    @ui_utils.gradio_error
+    model_repo_default = tagger_shared.default_repo
+    general_thresh_default = args.score_general_threshold
+    # general_mcut_enabled_default = 'False'
+    character_thresh_default = args.score_character_threshold
+    # character_mcut_enabled_default = 'False'
+    replace_underscores_default = 'True'
+    trim_general_tag_dupes_default = 'True'
+    escape_brackets_default = 'False'
+    overwrite_current_caption_default = 'False'
+    prefix_tags_default = ''
+    keep_tags_default = ''
+    ban_tags_default = ''
+    map_tags_default = ''
+
+    @ui_utils.gradio_warning(default=[
+        model_repo_default,
+        general_thresh_default,
+        # general_mcut_enabled_default,
+        character_thresh_default,
+        # character_mcut_enabled_default,
+        replace_underscores_default,
+        trim_general_tag_dupes_default,
+        escape_brackets_default,
+        overwrite_current_caption_default,
+        prefix_tags_default,
+        keep_tags_default,
+        ban_tags_default,
+        map_tags_default,
+    ])
     def _load_dataset_settings(folder: str):
         from yadt.dataset_db import db
 
-        model_repo = str(db.get_dataset_setting(folder, 'model_repo', default=tagger_shared.default_repo))
-        general_thresh = float(db.get_dataset_setting(folder, 'general_thresh', default=args.score_general_threshold))
-        # general_mcut_enabled = (db.get_dataset_setting(folder, 'general_mcut_enabled', default='False')) == 'True'
-        character_thresh = float(db.get_dataset_setting(folder, 'character_thresh', default=args.score_character_threshold))
-        # character_mcut_enabled = (db.get_dataset_setting(folder, 'character_mcut_enabled', default='False')) == 'True'
-        replace_underscores = (db.get_dataset_setting(folder, 'replace_underscores', default='True')) == 'True'
-        trim_general_tag_dupes = (db.get_dataset_setting(folder, 'trim_general_tag_dupes', default='True')) == 'True'
-        escape_brackets = (db.get_dataset_setting(folder, 'escape_brackets', default='False')) == 'True'
-        overwrite_current_caption = (db.get_dataset_setting(folder, 'overwrite_current_caption', default='False')) == 'True'
-        prefix_tags = str(db.get_dataset_setting(folder, 'prefix_tags', default=''))
-        keep_tags = str(db.get_dataset_setting(folder, 'keep_tags', default=''))
-        ban_tags = str(db.get_dataset_setting(folder, 'ban_tags', default=''))
-        map_tags = str(db.get_dataset_setting(folder, 'map_tags', default=''))
+        model_repo = str(db.get_dataset_setting(folder, 'model_repo', default=model_repo_default))
+        general_thresh = float(db.get_dataset_setting(folder, 'general_thresh', default=general_thresh_default))
+        # general_mcut_enabled = (db.get_dataset_setting(folder, 'general_mcut_enabled', default=general_mcut_enabled_default)) == 'True'
+        character_thresh = float(db.get_dataset_setting(folder, 'character_thresh', default=character_thresh_default))
+        # character_mcut_enabled = (db.get_dataset_setting(folder, 'character_mcut_enabled', default=character_mcut_enabled_default)) == 'True'
+        replace_underscores = (db.get_dataset_setting(folder, 'replace_underscores', default=replace_underscores_default)) == 'True'
+        trim_general_tag_dupes = (db.get_dataset_setting(folder, 'trim_general_tag_dupes', default=trim_general_tag_dupes_default)) == 'True'
+        escape_brackets = (db.get_dataset_setting(folder, 'escape_brackets', default=escape_brackets_default)) == ''
+        overwrite_current_caption = (db.get_dataset_setting(folder, 'overwrite_current_caption', default=overwrite_current_caption_default)) == 'True'
+        prefix_tags = str(db.get_dataset_setting(folder, 'prefix_tags', default=prefix_tags_default))
+        keep_tags = str(db.get_dataset_setting(folder, 'keep_tags', default=keep_tags_default))
+        ban_tags = str(db.get_dataset_setting(folder, 'ban_tags', default=ban_tags_default))
+        map_tags = str(db.get_dataset_setting(folder, 'map_tags', default=map_tags_default))
 
         return [
             model_repo,
@@ -165,7 +200,7 @@ def load_dataset_settings(args):
     return _load_dataset_settings
 
 def save_dataset_settings(args):
-    @ui_utils.gradio_error
+    @ui_utils.gradio_warning
     def _save_dataset_settings(
             folder: str,
             model_repo: str,
@@ -200,7 +235,7 @@ def save_dataset_settings(args):
 
     return _save_dataset_settings
 
-@ui_utils.gradio_error
+@ui_utils.gradio_warning(default=[])
 def load_recent_datasets():
     from yadt.dataset_db import db
     return db.get_recent_datasets()
@@ -341,7 +376,7 @@ def ui(args):
 
 
     submit.click(
-        process_dataset_folder,
+        process_dataset_folder(args),
         inputs=[
             folder,
             model_repo,
