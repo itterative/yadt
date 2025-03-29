@@ -59,7 +59,7 @@ class Predictor:
         )
         return csv_path, model_path
 
-    def load_model(self, model_repo):
+    def load_model(self, model_repo, **kwargs):
         csv_path, model_path = self.download_model(model_repo)
 
         tags_df = pd.read_csv(csv_path)

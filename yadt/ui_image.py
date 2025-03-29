@@ -6,27 +6,30 @@ from yadt import tagger_shared
 from yadt import process_prediction
 from yadt import ui_utils
 
-@ui_utils.gradio_error
-def predict(
-        image: Image,
-        model_repo: str,
-        general_thresh: float,
-        general_mcut_enabled: bool,
-        character_thresh: float,
-        character_mcut_enabled: bool,
-        replace_underscores: bool,
-        trim_general_tag_dupes: bool,
-        escape_brackets: bool,
-):
-    assert image is not None, "No image selected"
+def predict(args):
+    @ui_utils.gradio_error
+    def _predict(
+            image: Image,
+            model_repo: str,
+            general_thresh: float,
+            general_mcut_enabled: bool,
+            character_thresh: float,
+            character_mcut_enabled: bool,
+            replace_underscores: bool,
+            trim_general_tag_dupes: bool,
+            escape_brackets: bool,
+    ):
+        assert image is not None, "No image selected"
 
-    tagger_shared.predictor.load_model(model_repo)
+        tagger_shared.predictor.load_model(model_repo, device=args.device)
 
-    return process_prediction.post_process_prediction(
-        *tagger_shared.predictor.predict(image),
-        general_thresh, general_mcut_enabled, character_thresh, character_mcut_enabled,
-        replace_underscores, trim_general_tag_dupes, escape_brackets,
-    )
+        return process_prediction.post_process_prediction(
+            *tagger_shared.predictor.predict(image),
+            general_thresh, general_mcut_enabled, character_thresh, character_mcut_enabled,
+            replace_underscores, trim_general_tag_dupes, escape_brackets,
+        )
+    
+    return _predict
 
 
 def ui(args):
@@ -113,7 +116,7 @@ def ui(args):
             )
 
     submit.click(
-        predict,
+        predict(args),
         inputs=[
             image,
             model_repo,

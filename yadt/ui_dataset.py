@@ -74,7 +74,7 @@ def process_dataset_folder(args):
             if cache is not None:
                 rating, general_res, character_res = decode_results(cache)
             else:
-                tagger_shared.predictor.load_model(model_repo)
+                tagger_shared.predictor.load_model(model_repo, device=args.device)
                 rating, general_res, character_res = tagger_shared.predictor.predict(image)
 
             db.set_dataset_cache(file_hash, model_repo, folder, encode_results(rating, general_res, character_res))

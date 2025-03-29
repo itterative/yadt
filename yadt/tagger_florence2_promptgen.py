@@ -12,8 +12,11 @@ class Predictor:
         self.model = None
         self.processor = None
         self.prompt = "<GENERATE_TAGS>"
+        self.device = None
 
-    def load_model(self, model_repo: str):
+    def load_model(self, model_repo: str, **kwargs):
+        self.device = kwargs.pop('device', None)
+
         from yadt.tagger_florence2_promptgen_model import load_model
 
         if model_repo == FLORENCE2_PROMPTGEN_LARGE:
@@ -27,6 +30,8 @@ class Predictor:
         
         self.model, self.processor = load_model(repo_name=repo_name, revision=revision)
 
+        if self.device is not None:
+            self.model.to(self.device)
 
     def predict(self, image: Image):
         assert self.model is not None, "No model loaded"
@@ -37,7 +42,9 @@ class Predictor:
             rgb_image.paste(image)
             image = rgb_image
 
-        inputs = self.processor(text=self.prompt, images=image, return_tensors="pt").to('cpu')
+        inputs = self.processor(text=self.prompt, images=image, return_tensors="pt")
+        if self.device is not None:
+            inputs = inputs.to(self.device)
 
         generated_ids = self.model.generate(
             input_ids=inputs["input_ids"],

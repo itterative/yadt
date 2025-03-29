@@ -11,6 +11,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", type=str, default="127.0.0.1")
     parser.add_argument("--port", type=int, default=7860)
+    parser.add_argument("--device", type=str, default="auto")
     parser.add_argument("--score-slider-step", type=float, default=0.05)
     parser.add_argument("--score-general-threshold", type=float, default=0.35)
     parser.add_argument("--score-character-threshold", type=float, default=0.9)
@@ -22,6 +23,15 @@ def main():
     from yadt import ui_image, ui_directory, ui_dataset, ui_misc
 
     args = parse_args()
+
+    if args.device == "auto":
+        import torch
+        if torch.cuda.is_available():
+            args.device = 'cuda:0'
+        else:
+            args.device = 'cpu'
+
+    print('* Using device:', args.device)
 
     with gr.Blocks(title=TITLE) as demo:
         with gr.Column():

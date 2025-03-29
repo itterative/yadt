@@ -40,9 +40,11 @@ class Predictor:
 
         return metadata_path, model_info_path, state_dict_path
 
-    def load_model(self, model_repo: str):
+    def load_model(self, model_repo: str, **kwargs):
         full_model = model_repo == CAMIE_MODEL_FULL
         metadata_path, model_info_path, state_dict_path = self.download_model(full_model)
+
+        device = kwargs.pop('device', 'cpu')
 
         from yadt.tagger_camie_model import load_model
 
@@ -52,6 +54,7 @@ class Predictor:
             metadata_path=metadata_path,
             model_info_path=model_info_path,
             state_dict_path=state_dict_path,
+            device=device,
         )
 
 
