@@ -35,6 +35,9 @@ def process_dataset_folder(args):
     ):
         warning_default[0] = folder
 
+        assert len(folder) > 0, "No folder given"
+        assert os.path.isdir(folder), "Folder either doesn't exist or is not a folder"
+
         def hash_file(path: str):
             import hashlib
 
@@ -241,138 +244,139 @@ def load_recent_datasets():
     return db.get_recent_datasets()
 
 def ui(args):
-    with gr.Row():
-        with gr.Column(variant="panel"):
-            with gr.Row(equal_height=True):
-                # folder = gr.Textbox(label="Select folder:", scale=1)
-                folder = gr.Dropdown(
-                    label="Select folder:",
-                    choices=load_recent_datasets(),
-                    allow_custom_value=True,
-                    scale=1,
-                )
-
-                load_folder = gr.Button(value="Load", variant="primary", scale=0)
-
-            gr.HTML('<p style="margin-top: -1em"><i>Dataset settings are saved on submit. Use the load button to reload them.</i></p>')
-
-            model_repo = gr.Dropdown(
-                tagger_shared.dropdown_list,
-                value=tagger_shared.default_repo,
-                label="Model",
-            )
-
-            with gr.Row():
-                general_thresh = gr.Slider(
-                    0,
-                    1,
-                    step=args.score_slider_step,
-                    value=args.score_general_threshold,
-                    label="General Tags Threshold",
-                    scale=3,
-                )
-
-                character_thresh = gr.Slider(
-                    0,
-                    1,
-                    step=args.score_slider_step,
-                    value=args.score_character_threshold,
-                    label="Character Tags Threshold",
-                    scale=3,
-                )
-
-            with gr.Row():
-                overwrite_current_caption = gr.Checkbox(
-                    value=False,
-                    label="Overwrite existing captions",
-                    scale=1,
-                )
-                replace_underscores = gr.Checkbox(
-                    value=True,
-                    label="Replace underscores with spaces",
-                    scale=1,
-                )
-                trim_general_tag_dupes = gr.Checkbox(
-                    value=True,
-                    label="Trim duplicate general tags",
-                    scale=1,
-                )
-                escape_brackets = gr.Checkbox(
-                    value=False,
-                    label="Escape brackets (for webui)",
-                    scale=1,
-                )
-
-            with gr.Column(variant='panel'):
-                prefix_tags = gr.Textbox(label="Prefix tags:", placeholder="tag1, tag2, ...")
-                keep_tags = gr.Textbox(label="Keep tags:", placeholder="tag1, tag2, ...")
-                ban_tags = gr.Textbox(label="Ban tags:", placeholder="tag1, tag2, ...")
-                map_tags = gr.Textbox(label="Map tags", placeholder="one or more lines of \"tag1, tag2, ... : tag\"", lines=5, max_lines=100)
-
-                gr.HTML('''
-                    <p>Prefixing tags</p>
-                    <p><i>Adding any tags to this will sort the tags and add them before a "BREAK" tag.</i></p>
-                    <br>
-                    <p>Mapping tags</p>
-                    <p><i>You can map certain one or more tags to different tags. Examples: </i></p>
-                    <p style="padding-left: 1em"><i>* BAD_TAG : GOOD_TAG</i></p>
-                    <p style="padding-left: 1em"><i>* 2girl : 2girls, GIRL_ONE, GIRL_TWO</i></p>
-                ''')
-            
-            with gr.Row():
-                clear = gr.ClearButton(
-                    components=[
-                        folder,
-                        model_repo,
-                        general_thresh,
-                        # general_mcut_enabled,
-                        character_thresh,
-                        # character_mcut_enabled,
-                        replace_underscores,
-                        trim_general_tag_dupes,
-                        escape_brackets,
-                        overwrite_current_caption,
-                        prefix_tags,
-                        keep_tags,
-                        ban_tags,
-                        map_tags,
-                    ],
-                    variant="secondary",
-                    size="lg",
-                )
-    
-                submit = gr.Button(value="Submit", variant="primary", size="lg")
-
-        with gr.Column():
+    with gr.Blocks() as page:
+        with gr.Row():
             with gr.Column(variant="panel"):
-                gallery = gr.Gallery(interactive=False, columns=4)
-                gallery_tags = gr.Text(lines=4, interactive=False, show_label=False, container=False, placeholder="Select an image to view the resulting tags.")
+                with gr.Row(equal_height=True):
+                    # folder = gr.Textbox(label="Select folder:", scale=1)
+                    folder = gr.Dropdown(
+                        label="Select folder:",
+                        choices=load_recent_datasets(),
+                        allow_custom_value=True,
+                        scale=1,
+                    )
 
-                def on_gallery_select(event: gr.SelectData):
-                    return event.value['caption']
+                    load_folder = gr.Button(value="Load", variant="primary", scale=0)
 
-                gallery.select(
-                    on_gallery_select,
-                    outputs=gallery_tags,
+                gr.HTML('<p style="margin-top: -1em"><i>Dataset settings are saved on submit. Use the load button to reload them.</i></p>')
+
+                model_repo = gr.Dropdown(
+                    tagger_shared.dropdown_list,
+                    value=tagger_shared.default_repo,
+                    label="Model",
                 )
 
-                gallery.preview_close(
-                    lambda *args: None,
-                    outputs=gallery_tags,
-                )
+                with gr.Row():
+                    general_thresh = gr.Slider(
+                        0,
+                        1,
+                        step=args.score_slider_step,
+                        value=args.score_general_threshold,
+                        label="General Tags Threshold",
+                        scale=3,
+                    )
 
-            with gr.Column(variant="panel"):
-                rating = gr.Label(label="Rating")
-                character_res = gr.Label(label="Output (characters)")
-                general_res = gr.Label(label="Output (tags)")
+                    character_thresh = gr.Slider(
+                        0,
+                        1,
+                        step=args.score_slider_step,
+                        value=args.score_character_threshold,
+                        label="Character Tags Threshold",
+                        scale=3,
+                    )
 
-                clear.add(
-                    [
-                        rating,
-                        character_res,
-                        general_res,
-                    ]
-                )
+                with gr.Row():
+                    overwrite_current_caption = gr.Checkbox(
+                        value=False,
+                        label="Overwrite existing captions",
+                        scale=1,
+                    )
+                    replace_underscores = gr.Checkbox(
+                        value=True,
+                        label="Replace underscores with spaces",
+                        scale=1,
+                    )
+                    trim_general_tag_dupes = gr.Checkbox(
+                        value=True,
+                        label="Trim duplicate general tags",
+                        scale=1,
+                    )
+                    escape_brackets = gr.Checkbox(
+                        value=False,
+                        label="Escape brackets (for webui)",
+                        scale=1,
+                    )
+
+                with gr.Column(variant='panel'):
+                    prefix_tags = gr.Textbox(label="Prefix tags:", placeholder="tag1, tag2, ...")
+                    keep_tags = gr.Textbox(label="Keep tags:", placeholder="tag1, tag2, ...")
+                    ban_tags = gr.Textbox(label="Ban tags:", placeholder="tag1, tag2, ...")
+                    map_tags = gr.Textbox(label="Map tags", placeholder="one or more lines of \"tag1, tag2, ... : tag\"", lines=5, max_lines=100)
+
+                    gr.HTML('''
+                        <p>Prefixing tags</p>
+                        <p><i>Adding any tags to this will sort the tags and add them before a "BREAK" tag.</i></p>
+                        <br>
+                        <p>Mapping tags</p>
+                        <p><i>You can map certain one or more tags to different tags. Examples: </i></p>
+                        <p style="padding-left: 1em"><i>* BAD_TAG : GOOD_TAG</i></p>
+                        <p style="padding-left: 1em"><i>* 2girl : 2girls, GIRL_ONE, GIRL_TWO</i></p>
+                    ''')
+                
+                with gr.Row():
+                    clear = gr.ClearButton(
+                        components=[
+                            folder,
+                            model_repo,
+                            general_thresh,
+                            # general_mcut_enabled,
+                            character_thresh,
+                            # character_mcut_enabled,
+                            replace_underscores,
+                            trim_general_tag_dupes,
+                            escape_brackets,
+                            overwrite_current_caption,
+                            prefix_tags,
+                            keep_tags,
+                            ban_tags,
+                            map_tags,
+                        ],
+                        variant="secondary",
+                        size="lg",
+                    )
+        
+                    submit = gr.Button(value="Submit", variant="primary", size="lg")
+
+            with gr.Column():
+                with gr.Column(variant="panel"):
+                    gallery = gr.Gallery(interactive=False, columns=4)
+                    gallery_tags = gr.Text(lines=4, interactive=False, show_label=False, container=False, placeholder="Select an image to view the resulting tags.")
+
+                    def on_gallery_select(event: gr.SelectData):
+                        return event.value['caption']
+
+                    gallery.select(
+                        on_gallery_select,
+                        outputs=gallery_tags,
+                    )
+
+                    gallery.preview_close(
+                        lambda *args: None,
+                        outputs=gallery_tags,
+                    )
+
+                with gr.Column(variant="panel"):
+                    rating = gr.Label(label="Rating")
+                    character_res = gr.Label(label="Output (characters)")
+                    general_res = gr.Label(label="Output (tags)")
+
+                    clear.add(
+                        [
+                            rating,
+                            character_res,
+                            general_res,
+                        ]
+                    )
 
 
     submit.click(
@@ -419,6 +423,12 @@ def ui(args):
     ]
 
     folder.select(
+        load_dataset_settings(args),
+        inputs=[folder],
+        outputs=dataset_settings,
+    )
+
+    page.load(
         load_dataset_settings(args),
         inputs=[folder],
         outputs=dataset_settings,
