@@ -203,20 +203,33 @@ class _db:
             cursor = conn.cursor()
 
             try:
-                rows = cursor.execute('insert or ignore into dataset_stats (dataset) values (?) returning id', (dataset,)).fetchall()
-                if len(rows) == 0:
+                try:
+                    rows = cursor.execute('insert or abort into dataset_stats (dataset) values (?) returning id', (dataset,)).fetchall()
+                    conn.commit()
+                except sqlite3.IntegrityError:
                     rows = cursor.execute('select id from dataset_stats where dataset = ?', (dataset,)).fetchall()
 
                 dataset_id = int(rows[0][0])
 
-                rows = cursor.execute('insert or ignore into dataset_file_hash (hash) values (?) returning id', (hash,)).fetchall()
-                if len(rows) == 0:
+                try:
+                    rows = cursor.execute('insert or abort into dataset_file_hash (hash) values (?) returning id', (hash,)).fetchall()
+                    conn.commit()
+                except sqlite3.IntegrityError:
                     rows = cursor.execute('select id from dataset_file_hash where hash = ?', (hash,)).fetchall()
 
                 hash_id = int(rows[0][0])
 
-                cursor.execute('insert or replace into dataset_cache (hash_id, repo_name, data) values (?, ?, ?)', (hash_id, repo_name, data))
-                cursor.execute('insert or ignore into dataset_cache_stats (dataset_id, hash_id) values (?, ?)', (dataset_id, hash_id))
+                try:
+                    cursor.execute('insert or abort into dataset_cache (hash_id, repo_name, data) values (?, ?, ?)', (hash_id, repo_name, data))
+                    conn.commit()
+                except sqlite3.IntegrityError:
+                    pass
+
+                try:
+                    cursor.execute('insert or abort into dataset_cache_stats (dataset_id, hash_id) values (?, ?)', (dataset_id, hash_id))
+                    conn.commit()
+                except sqlite3.IntegrityError:
+                    pass
 
                 conn.commit()
             except sqlite3.Error as e:
