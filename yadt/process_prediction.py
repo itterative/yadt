@@ -307,49 +307,69 @@ def post_process_manual_edits(
 ):
     import difflib
 
-    def merge_diff(initial, diff):
-        updated = list(initial)
-        diff = [ (i, tag_diff[:2], tag_diff[2:]) for i, tag_diff in enumerate(diff)]
+    def merge_diffs(initial, new):
+        i_initial = 0
+        l_initial = len(initial)
+        i_new = 0
+        l_new = len(new)
 
-        for i, op, tag in diff:
-            if op == '+ ':
-                # skip if already exists
-                # FIXME: what if tags are duplicated?
-                try:
-                    updated.index(tag)
-                    continue
-                except ValueError:
-                    pass
+        merged = []
 
-                # print('adding', i, tag)
+        while i_initial < l_initial and i_new < l_new:
+            c_initial = initial[i_initial]
+            c_new = new[i_new]
 
-                # find where tag should be inserted at
-                tag_i = i
-                for j in range(i-1, -1, -1):
-                    # print('  try', j, x2[j][2:], x)
-                    try:
-                        tag_i = updated.index(diff[j][2])
-                        # print('  found', xi)
-                        break
-                    except ValueError:
-                        continue
+            op_initial, tag_initial = c_initial[:2], c_initial[2:]
+            op_new, tag_new = c_new[:2], c_new[2:]
 
-                # insert tag in appropriate place
-                tag_i = min(len(updated), tag_i)
-                updated.insert(tag_i+1, tag)
-            elif op == '- ':
-                # print('removing', i, tag)
-                try:
-                    updated.remove(tag)
-                except ValueError:
-                    pass
+            tags_equal = tag_initial == tag_new
 
-        return updated
+            match (tags_equal, op_initial, op_new):
+                case (True, _, _):
+                    merged.append(c_initial)
+                    i_initial += 1
+                    i_new += 1
+                case (False, '  ', _):
+                    merged.append(c_new)
+                    i_new += 1
+                case (False, _, '  '):
+                    merged.append(c_initial)
+                    i_initial += 1
+                case (False, '+ ', '+ '):
+                    merged.append(c_initial)
+                    i_initial += 1
+                case (False, '+ ', '- '):
+                    merged.append(c_new)
+                    merged.append(c_initial)
+                    i_initial += 1
+                    i_new += 1
+                case (False, '- ', '+ '):
+                    merged.append(c_new)
+                    merged.append(c_initial)
+                    i_initial += 1
+                    i_new += 1
+                case (False, '- ', '- '):
+                    merged.append(c_initial)
+                    merged.append(c_new)
+                    i_initial += 1
+                    i_new += 1
+        
+        
+        for i in range(i_initial, l_initial):
+            merged.append(initial[i])
+
+        for i in range(i_new, l_new):
+            merged.append(new[i])
+        
+        return merged
     
     initial_tags = [tag.strip() for tag in initial_tags.split(',')]
     edited_tags = [tag.strip() for tag in edited_tags.split(',')]
     new_tags = [tag.strip() for tag in new_tags.split(',')]
 
-    diff = list(difflib.ndiff(initial_tags, edited_tags))
+    diff_initial = list(difflib.ndiff(initial_tags, edited_tags))
+    diff_new = list(difflib.ndiff(initial_tags, new_tags))
 
-    return ', '.join(merge_diff(new_tags, diff))
+    diff_after = merge_diffs(diff_initial, diff_new)
+
+    return ', '.join(difflib.restore(diff_after, 2))
