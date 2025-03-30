@@ -2,14 +2,21 @@ import time
 import sqlite3
 
 from contextlib import contextmanager
+from dataclasses import dataclass
 
 from collections import deque
-from threading import Condition, Semaphore, Thread
+from threading import Condition, Semaphore, Thread, Lock
+
+@dataclass
+class PoolConnection:
+    last_used: float
+    connection: sqlite3.Connection
 
 class Sqlite3DBPool:
-    def __init__(self, database: str, default_timeout: float = 10, max_connections: int = 10, **pragmas: str):
+    def __init__(self, database: str, default_timeout: float = 10, idle_timeout: float = 30, max_connections: int = 10, **pragmas: str):
         self._database = database
         self._max_connections = max_connections
+        self._idle_timeout = idle_timeout
         self._default_timeout = default_timeout
         self._pragmas = pragmas
         self._connection_sem_allowed = 0
@@ -17,10 +24,10 @@ class Sqlite3DBPool:
         self._connection_count = 0
         self._connections_open = False
         self._connections_open_cv = Condition()
-        self._connection_pool: deque[sqlite3.Connection] = deque()
-        self._connections_active: set[sqlite3.Connection] = set()
+        self._connection_pool: deque[PoolConnection] = deque()
+        self._connection_pool_lock = Lock()
         
-        self._cleanup_thread = Thread(target=self._cleanup, daemon=True)
+        self._cleanup_thread = Thread(name=f'Sqlite3DBPool._cleanup', target=self._cleanup, daemon=True)
         self._cleanup_thread.start()
 
     @contextmanager
@@ -35,35 +42,35 @@ class Sqlite3DBPool:
                 if not self._connections_open_cv.wait(timeout=max(0, timeout_t-time.time())):
                     raise TimeoutError('Could not aquire database connection')
 
-            if not self._connection_sem.acquire(timeout=max(0, timeout_t-time.time())):
-                raise TimeoutError('Could not aquire database connection')
-            
-            try:
-                connection = None
+        if not self._connection_sem.acquire(timeout=max(0, timeout_t-time.time())):
+            raise TimeoutError('Could not aquire database connection')
+        
+        try:
+            pool_item = None
 
+            with self._connection_pool_lock:
                 if len(self._connection_pool) > 0:
-                    connection = self._connection_pool.popleft()
+                    pool_item = self._connection_pool.popleft()
                 elif self._connection_count < self._max_connections:
                     connection = sqlite3.connect(self._database, check_same_thread=False)
 
                     for pragma, value in self._pragmas.items():
                         connection.execute(f'pragma {pragma} = {value}')
 
+                    pool_item = PoolConnection(last_used=time.time(), connection=connection)
                     self._connection_count += 1
 
-                assert connection is not None, "no connection was aquired"
-                self._connections_active.add(connection)
+            try:
+                yield pool_item.connection
+                pool_item.connection.commit()
+            except sqlite3.Error:
+                pool_item.connection.rollback()
+        finally:
+            if pool_item is not None:
+                pool_item.last_used = time.time()
 
-                try:
-                    yield connection
-                    connection.commit()
-                except sqlite3.Error:
-                    connection.rollback()
-            finally:
-                if connection is not None:
-                    self._connections_active.remove(connection)
-                    self._connection_pool.append(connection)
-                    self._connection_sem.release()
+                self._connection_pool.append(pool_item)
+                self._connection_sem.release()
 
     def open(self):
         with self._connections_open_cv:
@@ -76,9 +83,9 @@ class Sqlite3DBPool:
 
 
     def close(self):
-        self._connections_open = False
-
         with self._connections_open_cv:
+            self._connections_open = False
+
             while self._connection_sem_allowed > 0:
                 self._connection_sem_allowed -= 1
                 self._connection_sem.acquire()
@@ -94,32 +101,46 @@ class Sqlite3DBPool:
 
         try:
             while True:
-                # TODO: connection idle time
                 time.sleep(60)
-                self._cleanup_connections()                
+
+                with self._connections_open_cv:
+                    if not self._connections_open:
+                        continue
+
+                self._cleanup_connections()
         except KeyboardInterrupt:
             return
     
     def _cleanup_connections(self, all: bool = False):
-        cleaned_up_connections = 0
+        removed_connections: list[PoolConnection] = []
+        cleaned_up_connections: list[PoolConnection] = []
 
-        try:
-            while self._connection_count > 0:
-                if not self._connection_sem.acquire(blocking=all):
-                    break
-
-                try:
-                    if len(self._connection_pool) <= 0:
+        with self._connection_pool_lock:
+            try:
+                while self._connection_count > 0:
+                    if not self._connection_sem.acquire(blocking=all):
                         break
 
-                    connection = self._connection_pool.popleft()
-                    assert connection is not None, "no connection was aquired"
+                    current_t = time.time()
 
-                    connection.close()
-                    cleaned_up_connections += 1
-                    self._connection_count -= 1
-                finally:
-                    self._connection_sem.release()
-        finally:
-            # print('cleaned_up_connections', cleaned_up_connections)
-            pass
+                    try:
+                        if len(self._connection_pool) <= 0:
+                            break
+
+                        pool_item = self._connection_pool.popleft()
+                        assert pool_item is not None, "no connection was aquired"
+
+                        if current_t - pool_item.last_used > self._idle_timeout or all:
+                            pool_item.connection.close()
+                            self._connection_count -= 1
+                            removed_connections.append(pool_item)
+                        else:
+                            cleaned_up_connections.append(pool_item)
+                    finally:
+                        self._connection_sem.release()
+            finally:
+                for pool_item in cleaned_up_connections:
+                    self._connection_pool.append(pool_item)
+
+                # print('removed_connections', removed_connections)
+                # print('cleaned_up_connections', cleaned_up_connections)
