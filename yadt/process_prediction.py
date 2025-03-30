@@ -1,5 +1,6 @@
 from typing import Tuple, Dict, List
 
+import functools
 import numpy as np
 
 # https://github.com/toriato/stable-diffusion-webui-wd14-tagger/blob/a9eacb1eff904552d3012babfa28b57e1d3e295c/tagger/ui.py#L368
@@ -24,6 +25,10 @@ kaomojis = {
     "|_|",
     "||_||",
 }
+
+@functools.lru_cache(maxsize=102400)
+def _replace_underscore_for_tag(tag):
+    return tag.replace('_', ' ') if tag not in kaomojis else tag
 
 def post_process_prediction(
         rating: Dict[str, float],
@@ -66,7 +71,7 @@ def post_process_prediction(
             return tags
 
         return [
-            [ tag.replace('_', ' ') if tag not in kaomojis else tag, prob] for tag, prob in tags
+            [ _replace_underscore_for_tag(tag), prob] for tag, prob in tags
         ]
 
     def _generate_string(character_res: List[Tuple[str, float]], general_res: List[Tuple[str, float]]):

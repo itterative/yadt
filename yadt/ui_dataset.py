@@ -82,20 +82,20 @@ def process_dataset_folder(args):
 
             file_hash = hash_file(image_path)
             file_hash_hex = file_hash.hex()
-            cache = db.get_dataset_cache(file_hash, model_repo)
 
             try:
                 image = Image.open(image_path)
             except Exception as e:
                 continue
 
+            cache = db.get_dataset_cache(file_hash, model_repo)
             if cache is not None:
                 rating, general_res, character_res = decode_results(cache)
             else:
                 tagger_shared.predictor.load_model(model_repo, device=args.device)
                 rating, general_res, character_res = tagger_shared.predictor.predict(image)
 
-            db.set_dataset_cache(file_hash, model_repo, folder, encode_results(rating, general_res, character_res))
+                db.set_dataset_cache(file_hash, model_repo, folder, encode_results(rating, general_res, character_res))
 
             sorted_general_strings, rating, general_res, character_res = \
                 process_prediction.post_process_prediction(
