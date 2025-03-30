@@ -23,7 +23,7 @@ def process_dataset_folder(args):
     import pickle
     import hashlib
 
-    from yadt.dataset_db import db
+    from yadt.db_dataset import db
 
 
     def hash_file(path: str):
@@ -196,7 +196,7 @@ def process_dataset_gallery_filters(args):
 
 @ui_utils.gradio_warning(default=[])
 def load_recent_datasets():
-    from yadt.dataset_db import db
+    from yadt.db_dataset import db
     return db.get_recent_datasets()
 
 def load_dataset_settings(args):
@@ -230,7 +230,7 @@ def load_dataset_settings(args):
         map_tags_default,
     ])
     def _load_dataset_settings(folder: str):
-        from yadt.dataset_db import db
+        from yadt.db_dataset import db
 
         model_repo = str(db.get_dataset_setting(folder, 'model_repo', default=model_repo_default))
         general_thresh = float(db.get_dataset_setting(folder, 'general_thresh', default=general_thresh_default))
@@ -282,7 +282,7 @@ def save_dataset_settings(args):
             ban_tags: str,
             map_tags: str,
     ):
-        from yadt.dataset_db import db
+        from yadt.db_dataset import db
 
         db.set_dataset_setting(folder, 'model_repo', str(model_repo))
         db.set_dataset_setting(folder, 'general_thresh', str(general_thresh))
@@ -336,7 +336,7 @@ def on_gallery_reload(selection: tuple[str, str], all_images: list[tuple[str, tu
 
 @ui_utils.gradio_warning
 def on_gallery_save(selection: tuple[str, str], all_images: list[tuple[str, tuple[str, str, str]]], caption: str):
-    from yadt.dataset_db import db
+    from yadt.db_dataset import db
 
     assert len(selection) > 0, "No gallery image selected"
 

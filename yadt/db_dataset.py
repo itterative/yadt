@@ -1,3 +1,5 @@
+from yadt.db_pool import Sqlite3DBPool
+
 class _db:
     def __init__(self):
         import pathlib
@@ -5,6 +7,9 @@ class _db:
 
         self.path = pathlib.Path(__file__).parent.parent / 'dataset.db'
         self._db_lock = threading.Lock()
+
+        self._pool = Sqlite3DBPool(self.path, busy_timeout='10000', journal_model='wal', foreign_keys='on')
+        self._pool.open()
 
         with self._db_lock:
             self._setup_migrations()
@@ -19,13 +24,7 @@ class _db:
             lock = contextlib.nullcontext()
 
         with lock:
-            conn = sqlite3.connect(self.path)
-
-            conn.execute('pragma busy_timeout = 10000')
-            conn.execute('pragma journal_mode = wal')
-            conn.execute('pragma foreign_keys = on')
-
-            return conn
+            return self._pool.connection()
 
     def _setup_migrations(self):
         import sqlite3
@@ -356,7 +355,9 @@ class _db:
         import os
 
         with self._db_lock:
+            self._pool.close()
             os.unlink(self.path)
+            self._pool.open()
 
             self._setup_migrations()
             self._do_migrations()
