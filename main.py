@@ -1,6 +1,16 @@
 import argparse
+import pathlib
 
 import gradio as gr
+
+from injector import Injector
+
+from yadt.configuration_injector import InjectorConfiguration
+from yadt.ui_image import ImagePage
+from yadt.ui_dataset import DatasetPage
+# from yadt.ui_directory import DirectoryPage
+from yadt.ui_misc import MiscPage
+from yadt.ui_shared import SharedState
 
 TITLE = "Yet Another Dataset Tagger"
 DESCRIPTION = """
@@ -20,10 +30,6 @@ def parse_args() -> argparse.Namespace:
 
 
 def main():
-    import tempfile
-
-    from yadt import ui_image, ui_dataset, ui_misc
-
     args = parse_args()
 
     if args.device == "auto":
@@ -35,30 +41,41 @@ def main():
 
     print('* Using device:', args.device)
 
-    with tempfile.TemporaryDirectory(suffix='-yadt') as tempfolder:
-        print('* Using temporary folder:', tempfolder)
+    cache_folder = pathlib.Path(__file__).parent / '.cache_save'
+    cache_folder.mkdir(exist_ok=True)
 
-        args.tempfolder = tempfolder
+    print('* Using cache folder:', cache_folder)
 
-        with gr.Blocks(title=TITLE) as demo:
-            with gr.Column():
-                gr.Markdown(
-                    value=f"<h1 style='text-align: center; margin-bottom: 1rem'>{TITLE}</h1>"
-                )
-                gr.Markdown(value=DESCRIPTION)
+    injector = Injector(InjectorConfiguration(
+        device=args.device,
+        cache_folder=cache_folder,
+        score_character_threshold=args.score_character_threshold,
+        score_general_threshold=args.score_general_threshold,
+        score_slider_step=args.score_slider_step
+    ))
 
-                with gr.Tabs():
-                    with gr.Tab(label="Image"):
-                        ui_image.ui(args)
+    with gr.Blocks(title=TITLE) as demo:
+        _ = injector.get(SharedState)
 
-                    with gr.Tab(label="Dataset"):
-                        ui_dataset.ui(args)
+        with gr.Column():
+            gr.Markdown(value=f"<h1 style='text-align: center; margin-bottom: 1rem'>{TITLE}</h1>")
+            gr.Markdown(value=DESCRIPTION)
 
-                    with gr.Tab(label="Miscellaneous"):
-                        ui_misc.ui(args)
+            with gr.Tabs():
+                with gr.Tab(label="Image"):
+                    injector.get(ImagePage).ui()
 
-        demo.queue(max_size=10)
-        demo.launch(server_name=args.host, server_port=args.port, allowed_paths=[tempfolder])
+                # with gr.Tab(label="Directory"):
+                #     injector.get(DirectoryPage).ui()
+
+                with gr.Tab(label="Dataset"):
+                    injector.get(DatasetPage).ui()
+
+                with gr.Tab(label="Miscellaneous"):
+                    injector.get(MiscPage).ui()
+
+    demo.queue(max_size=10)
+    demo.launch(server_name=args.host, server_port=args.port, allowed_paths=[cache_folder])
 
 
 if __name__ == "__main__":

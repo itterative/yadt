@@ -1,15 +1,26 @@
 import os
 import gradio as gr
 
+from injector import inject, singleton
 from PIL import Image
+
+from yadt.configuration import Configuration
+from yadt.tagger_shared import Predictor
 
 from yadt import tagger_shared
 from yadt import process_prediction
 from yadt import ui_utils
 
-def predict_folder(args):
-    @ui_utils.gradio_error
+
+@singleton
+class DirectoryPage:
+    @inject
+    def __init__(self, configuration: Configuration, predictor: Predictor):
+        self._configuration = configuration
+        self._predictor = predictor
+
     def _predict_folder(
+            self,
             folder: str,
             model_repo: str,
             general_thresh: float,
@@ -20,9 +31,12 @@ def predict_folder(args):
             trim_general_tag_dupes: bool,
             escape_brackets: bool,
             overwrite_current_caption: bool,
-            progress = gr.Progress(),
+            progress: gr.Progress,
     ):
-        tagger_shared.predictor.load_model(model_repo, device=args.device)
+        assert len(folder) > 0, "No folder given"
+        assert os.path.isdir(folder), "Folder either doesn't exist or is not a folder"
+
+        self._predictor.load_model(model_repo, device=self._configuration.device)
 
         files = os.listdir(folder)
         files = list(filter(lambda f: not f.endswith('.txt') and not f.endswith('.npz'), files))
@@ -41,7 +55,7 @@ def predict_folder(args):
 
             sorted_general_strings, rating, general_res, character_res = \
                 process_prediction.post_process_prediction(
-                    *tagger_shared.predictor.predict(image),
+                    *self._predictor.predict(image),
                     general_thresh, general_mcut_enabled, character_thresh, character_mcut_enabled,
                     replace_underscores, trim_general_tag_dupes, escape_brackets,
                 )
@@ -75,113 +89,141 @@ def predict_folder(args):
 
         return all_rating, all_general_res, all_character_res
 
-    return _predict_folder
 
-def ui(args):
-    with gr.Row():
-        with gr.Column(variant="panel"):
-            folder = gr.Textbox(label="Select folder:")
-            model_repo = gr.Dropdown(
-                tagger_shared.dropdown_list,
-                value=tagger_shared.default_repo,
-                label="Model",
-            )
-
-            with gr.Row():
-                general_thresh = gr.Slider(
-                    0,
-                    1,
-                    step=args.score_slider_step,
-                    value=args.score_general_threshold,
-                    label="General Tags Threshold",
-                    scale=3,
-                )
-                general_mcut_enabled = gr.Checkbox(
-                    value=False,
-                    label="Use MCut threshold",
-                    scale=1,
-                )
-            with gr.Row():
-                character_thresh = gr.Slider(
-                    0,
-                    1,
-                    step=args.score_slider_step,
-                    value=args.score_character_threshold,
-                    label="Character Tags Threshold",
-                    scale=3,
-                )
-                character_mcut_enabled = gr.Checkbox(
-                    value=False,
-                    label="Use MCut threshold",
-                    scale=1,
-                )
-            with gr.Row():
-                overwrite_current_caption = gr.Checkbox(
-                    value=False,
-                    label="Overwrite existing captions",
-                    scale=1,
-                )
-                replace_underscores = gr.Checkbox(
-                    value=True,
-                    label="Replace underscores with spaces",
-                    scale=1,
-                )
-                trim_general_tag_dupes = gr.Checkbox(
-                    value=True,
-                    label="Trim duplicate general tags",
-                    scale=1,
-                )
-                escape_brackets = gr.Checkbox(
-                    value=True,
-                    label="Escape brackets (for webui)",
-                    scale=1,
+    def ui(self):
+        with gr.Row():
+            with gr.Column(variant="panel"):
+                folder = gr.Textbox(label="Select folder:")
+                model_repo = gr.Dropdown(
+                    tagger_shared.dropdown_list,
+                    value=tagger_shared.default_repo,
+                    label="Model",
                 )
 
-            with gr.Row():
-                clear = gr.ClearButton(
-                    components=[
-                        folder,
-                        model_repo,
-                        general_thresh,
-                        general_mcut_enabled,
-                        character_thresh,
-                        character_mcut_enabled,
-                        replace_underscores,
-                        trim_general_tag_dupes,
-                        escape_brackets,
-                        overwrite_current_caption,
-                    ],
-                    variant="secondary",
-                    size="lg",
-                )
-    
-                submit = gr.Button(value="Submit", variant="primary", size="lg")
+                with gr.Row():
+                    general_thresh = gr.Slider(
+                        0,
+                        1,
+                        step=self._configuration.score_slider_step,
+                        value=self._configuration.score_general_threshold,
+                        label="General Tags Threshold",
+                        scale=3,
+                    )
+                    general_mcut_enabled = gr.Checkbox(
+                        value=False,
+                        label="Use MCut threshold",
+                        scale=1,
+                    )
+                with gr.Row():
+                    character_thresh = gr.Slider(
+                        0,
+                        1,
+                        step=self._configuration.score_slider_step,
+                        value=self._configuration.score_character_threshold,
+                        label="Character Tags Threshold",
+                        scale=3,
+                    )
+                    character_mcut_enabled = gr.Checkbox(
+                        value=False,
+                        label="Use MCut threshold",
+                        scale=1,
+                    )
+                with gr.Row():
+                    overwrite_current_caption = gr.Checkbox(
+                        value=False,
+                        label="Overwrite existing captions",
+                        scale=1,
+                    )
+                    replace_underscores = gr.Checkbox(
+                        value=True,
+                        label="Replace underscores with spaces",
+                        scale=1,
+                    )
+                    trim_general_tag_dupes = gr.Checkbox(
+                        value=True,
+                        label="Trim duplicate general tags",
+                        scale=1,
+                    )
+                    escape_brackets = gr.Checkbox(
+                        value=True,
+                        label="Escape brackets (for webui)",
+                        scale=1,
+                    )
+
+                with gr.Row():
+                    clear = gr.ClearButton(
+                        components=[
+                            folder,
+                            model_repo,
+                            general_thresh,
+                            general_mcut_enabled,
+                            character_thresh,
+                            character_mcut_enabled,
+                            replace_underscores,
+                            trim_general_tag_dupes,
+                            escape_brackets,
+                            overwrite_current_caption,
+                        ],
+                        variant="secondary",
+                        size="lg",
+                    )
         
-        with gr.Column(variant="panel"):
-            rating = gr.Label(label="Rating")
-            character_res = gr.Label(label="Output (characters)")
-            general_res = gr.Label(label="Output (tags)")
-            clear.add(
-                [
-                    rating,
-                    character_res,
-                    general_res,
-                ]
-            )
+                    submit = gr.Button(value="Submit", variant="primary", size="lg")
+            
+            with gr.Column(variant="panel"):
+                rating = gr.Label(label="Rating")
+                character_res = gr.Label(label="Output (characters)")
+                general_res = gr.Label(label="Output (tags)")
+                clear.add(
+                    [
+                        rating,
+                        character_res,
+                        general_res,
+                    ]
+                )
 
-    submit.click(
-        predict_folder(args),
-        inputs=[
-            folder,
-            model_repo,
-            general_thresh,
-            general_mcut_enabled,
-            character_thresh,
-            character_mcut_enabled,
-            replace_underscores,
-            trim_general_tag_dupes,
-            escape_brackets,
-            overwrite_current_caption,
-        ],
-        outputs=[rating, general_res, character_res],
-    )
+        @gr.on(
+            submit.click,
+            inputs=[
+                folder,
+                model_repo,
+                general_thresh,
+                general_mcut_enabled,
+                character_thresh,
+                character_mcut_enabled,
+                replace_underscores,
+                trim_general_tag_dupes,
+                escape_brackets,
+                overwrite_current_caption,
+            ],
+            outputs=[rating, general_res, character_res],
+        )
+        def _predict_folder(
+                folder: str,
+                model_repo: str,
+                general_thresh: float,
+                general_mcut_enabled: bool,
+                character_thresh: float,
+                character_mcut_enabled: bool,
+                replace_underscores: bool,
+                trim_general_tag_dupes: bool,
+                escape_brackets: bool,
+                overwrite_current_caption: bool,
+                progress = gr.Progress(),
+        ):
+            with ui_utils.gradio_warning():
+                return self._predict_folder(
+                    folder,
+                    model_repo,
+                    general_thresh,
+                    general_mcut_enabled,
+                    character_thresh,
+                    character_mcut_enabled,
+                    replace_underscores,
+                    trim_general_tag_dupes,
+                    escape_brackets,
+                    overwrite_current_caption,
+                    progress,
+                )
+            
+            return {}, {}, {}

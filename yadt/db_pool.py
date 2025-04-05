@@ -26,9 +26,7 @@ class Sqlite3DBPool:
         self._connections_open_cv = Condition()
         self._connection_pool: deque[PoolConnection] = deque()
         self._connection_pool_lock = Lock()
-        
-        self._cleanup_thread = Thread(name=f'Sqlite3DBPool._cleanup', target=self._cleanup, daemon=True)
-        self._cleanup_thread.start()
+        self._connection_cleanup_thread: Thread = None
 
     @contextmanager
     def connection(self, timeout=None):
@@ -81,6 +79,9 @@ class Sqlite3DBPool:
             self._connections_open = True
             self._connections_open_cv.notify_all()
 
+        if self._connection_cleanup_thread is None:
+            self._connection_cleanup_thread = Thread(name=f'Sqlite3DBPool._cleanup', target=self._cleanup, kwargs=dict(until_closed=True), daemon=True)
+            self._connection_cleanup_thread.start()
 
     def close(self):
         with self._connections_open_cv:
@@ -95,17 +96,19 @@ class Sqlite3DBPool:
         self._connection_sem.release()
         self._cleanup_connections(all=True)
         self._connection_sem.acquire()
+
+        if self._connection_cleanup_thread is not None:
+            self._connection_cleanup_thread.join()
+            self._connection_cleanup_thread = None
         
-    def _cleanup(self):
-        import time
-
+    def _cleanup(self, until_closed: bool = False):
         try:
-            while True:
-                time.sleep(60)
-
+            while until_closed:
                 with self._connections_open_cv:
+                    self._connections_open_cv.wait(timeout=60)
+
                     if not self._connections_open:
-                        continue
+                        return
 
                 self._cleanup_connections()
         except KeyboardInterrupt:

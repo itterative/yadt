@@ -5,8 +5,10 @@ description = "Yet Another Dataset Tagger"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "duckdb>=1.2.1",
     "gradio>=5.16.1",
     "huggingface-hub>=0.29.0",
+    "injector>=0.22.0",
     "pillow>=9.0.0",
 ]
 

@@ -1,24 +1,33 @@
+import os
+import sqlite3
+import contextlib
+import threading
+import pathlib
+
+from injector import inject
+
+from yadt.configuration import Configuration
 from yadt.db_pool import Sqlite3DBPool
 
-class _db:
-    def __init__(self):
-        import pathlib
-        import threading
-
-        self.path = pathlib.Path(__file__).parent.parent / 'dataset.db'
+class DatasetDB:
+    @inject
+    def __init__(self, configuration: Configuration):
+        self.path = configuration.cache_folder / 'dataset.db'
         self._db_lock = threading.Lock()
 
         self._pool = Sqlite3DBPool(self.path, busy_timeout='10000', journal_model='wal', foreign_keys='on')
         self._pool.open()
+
+        # migrate old path
+        old_path = pathlib.Path(__file__).parent.parent / 'dataset.db'
+        if old_path.exists():
+            old_path.rename(self.path)
 
         with self._db_lock:
             self._setup_migrations()
             self._do_migrations()
 
     def _conn(self, locked: bool = True):
-        import sqlite3
-        import contextlib
-
         lock = self._db_lock
         if not locked:
             lock = contextlib.nullcontext()
@@ -27,8 +36,6 @@ class _db:
             return self._pool.connection()
 
     def _setup_migrations(self):
-        import sqlite3
-
         with self._conn(locked=False) as conn:
             cursor = conn.cursor()
 
@@ -39,11 +46,9 @@ class _db:
                 conn.commit()
             except sqlite3.Error as e:
                 conn.rollback()
-                raise Exception("could not create transactions") from e
+                raise Exception("could not create migrations table") from e
         
     def _do_migration(self, name: str, script: str):
-        import sqlite3
-
         with self._conn(locked=False) as conn:
             cursor = conn.cursor()
 
@@ -145,8 +150,6 @@ class _db:
             return [row[0] for row in rows]
 
     def update_recent_datasets(self, last_dataset: str):
-        import sqlite3
-
         with self._conn() as conn:
             cursor = conn.cursor()
 
@@ -212,8 +215,6 @@ class _db:
             ]
     
     def delete_dataset_cache_by_repo_name(self, repo_name: str):
-        import sqlite3
-
         with self._conn() as conn:
             cursor = conn.cursor()
 
@@ -245,8 +246,6 @@ class _db:
             ]
     
     def delete_dataset_cache_by_dataset(self, dataset: str):
-        import sqlite3
-
         with self._conn() as conn:
             cursor = conn.cursor()
 
@@ -260,8 +259,6 @@ class _db:
                 raise Exception(f"failed to deleted cache for dataset: {dataset}") from e
 
     def set_dataset_cache(self, hash: bytes, repo_name: str, dataset: str, data: bytes):
-        import sqlite3
-
         with self._conn() as conn:
             cursor = conn.cursor()
 
@@ -310,8 +307,6 @@ class _db:
             return str(rows[0][0]), str(rows[0][1])
 
     def set_dataset_edit(self, dataset: str, hash: bytes, previous_edit: str, new_edit: str):
-        import sqlite3
-
         with self._conn() as conn:
             cursor = conn.cursor()
 
@@ -339,8 +334,6 @@ class _db:
                 raise Exception("failed to update dataset cache") from e
 
     def vacuum(self):
-        import sqlite3
-
         with self._conn() as conn:
             cursor = conn.cursor()
 
@@ -352,15 +345,14 @@ class _db:
                 raise Exception('failed to minimize db size') from e
             
     def reset(self):
-        import os
-
         with self._db_lock:
             self._pool.close()
-            os.unlink(self.path)
+            try:
+                os.unlink(self.path)
+            except FileNotFoundError:
+                pass
             self._pool.open()
 
             self._setup_migrations()
             self._do_migrations()
 
-
-db = _db()

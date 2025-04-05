@@ -37,8 +37,6 @@ class Predictor:
         assert self.model is not None, "No model loaded"
         return self.model.predict(image)
 
-predictor = Predictor()
-
 default_repo = tagger_smilingwolf.EVA02_LARGE_MODEL_DSV3_REPO
 
 dropdown_list = [
