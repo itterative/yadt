@@ -5,10 +5,13 @@ import gradio as gr
 
 from injector import Injector
 
+from yadt import ui_styling
+
 from yadt.configuration_injector import InjectorConfiguration
 from yadt.ui_image import ImagePage
 from yadt.ui_dataset import DatasetPage
 # from yadt.ui_directory import DirectoryPage
+from yadt.ui_wiki import WikiPage
 from yadt.ui_misc import MiscPage
 from yadt.ui_shared import SharedState
 
@@ -54,7 +57,7 @@ def main():
         score_slider_step=args.score_slider_step
     ))
 
-    with gr.Blocks(title=TITLE) as demo:
+    with gr.Blocks(title=TITLE, css=ui_styling.CSS) as demo:
         _ = injector.get(SharedState)
 
         with gr.Column():
@@ -70,6 +73,9 @@ def main():
 
                 with gr.Tab(label="Dataset"):
                     injector.get(DatasetPage).ui()
+
+                with gr.Tab(label="Wiki"):
+                    injector.get(WikiPage).ui()
 
                 with gr.Tab(label="Miscellaneous"):
                     injector.get(MiscPage).ui()
