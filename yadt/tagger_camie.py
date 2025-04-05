@@ -15,27 +15,32 @@ class Predictor:
         metadata_path = huggingface_hub.hf_hub_download(
             CAMIE_MODEL_FULL,
             'model/metadata.json',
+            revision="ebe95d5f2453cf3196a4657b06339ae3ded5430a",
         )
 
         if full_model:
             model_info_path = huggingface_hub.hf_hub_download(
                 CAMIE_MODEL_FULL,
                 'model/model_info_refined.json',
+                revision="ebe95d5f2453cf3196a4657b06339ae3ded5430a",
             )
 
             state_dict_path = huggingface_hub.hf_hub_download(
                 CAMIE_MODEL_FULL,
                 'model/model_refined.pt',
+                revision="ebe95d5f2453cf3196a4657b06339ae3ded5430a",
             )
         else:
             model_info_path = huggingface_hub.hf_hub_download(
                 CAMIE_MODEL_FULL,
                 'model/model_info_initial.json',
+                revision="ebe95d5f2453cf3196a4657b06339ae3ded5430a",
             )
 
             state_dict_path = huggingface_hub.hf_hub_download(
                 CAMIE_MODEL_FULL,
                 'model/model_initial_only.pt',
+                revision="ebe95d5f2453cf3196a4657b06339ae3ded5430a",
             )
 
         return metadata_path, model_info_path, state_dict_path
@@ -65,5 +70,3 @@ class Predictor:
         tags = self.model.get_tags_from_predictions(results['predictions'], probabilities=results['refined_probabilities'])
 
         return dict(tags['rating']), dict(tags['general']), dict(tags['character'])
-
-

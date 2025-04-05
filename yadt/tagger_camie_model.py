@@ -1,3 +1,6 @@
+# Author: Camais03
+# Source: https://huggingface.co/Camais03/camie-tagger
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
