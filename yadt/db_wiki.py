@@ -115,20 +115,29 @@ class WikiDB:
         search_term = ' '.join(re.findall(SEARCH_TERM_RE, search_term))
 
         with self._conn(read_only=True) as cursor:
+            score_threshold = 0.1
+            if len(search_term) == 0:
+                score_threshold = 0
+
             cursor.execute("set variable search_term = ?", parameters=(search_term,))
+            cursor.execute("set variable score_threshold = ?", parameters=(score_threshold,))
 
             query = """
-                select title, post_count, title_score0 + title_score1 as title_score, text_score, title_score0 + title_score1 + text_score * log(post_count) as total_score from (
-                    select 
+                with wiki_scored as (
+                    select
                         *,
                         greatest(0.1, fts_main_wiki.match_bm25(id, getvariable('search_term'), fields := 'search_title', k := 0.0, b := 0.5, conjunctive := 1)) as title_score0,
-                        greatest(0, fts_main_wiki.match_bm25(id, getvariable('search_term'), fields := 'search_title', k := 0.0, b := 0.5)) as title_score1,
+                        greatest(0.1, fts_main_wiki.match_bm25(id, getvariable('search_term'), fields := 'search_title', k := 0.0, b := 0.5)) as title_score1,
                         add(greatest(0, fts_main_wiki.match_bm25(id, getvariable('search_term'), fields := 'search_text', k := 1.2, b := 0.0)), 0.1) as text_score
                     from wiki
-                ) sq where title_score0 > 0.1 or title_score1 > 0.1 or text_score > 0.1 order by title_score0 desc, total_score desc limit ?;
+                )
+                select title, post_count, title_score0 + title_score1 as title_score, text_score, title_score0 + title_score1 + text_score * log(post_count) as total_score from wiki_scored
+                    where title_score0 > getvariable('score_threshold') or title_score1 > getvariable('score_threshold') or text_score > getvariable('score_threshold')
+                    order by title_score0 desc, total_score desc limit ?;
             """
 
             results = cursor.sql(query, params=(limit,)).fetchall()
+            return [[ str(row[0]), int(row[1]) ] for row in results]
         
     def query_title(self, search_terms: list[str], limit: int = 10):
         with self._conn(read_only=True) as cursor:
