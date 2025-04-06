@@ -304,6 +304,7 @@ def post_process_manual_edits(
         initial_tags: str,
         edited_tags: str,
         new_tags: str,
+        whitelist: list[str] = None,
 ):
     import difflib
 
@@ -369,6 +370,29 @@ def post_process_manual_edits(
 
     diff_initial = list(difflib.ndiff(initial_tags, edited_tags))
     diff_new = list(difflib.ndiff(initial_tags, new_tags))
+
+    if whitelist is not None:
+        diff_new_with_whitelist = []
+
+        for diff in diff_new:
+            diff_type = diff[:2]
+            tag = diff[2:]
+            tag_in_whitelist = tag in whitelist
+
+            match (diff_type, tag_in_whitelist):
+                case ('  ', _):
+                    diff_new_with_whitelist.append(diff)
+                case ('- ', False):
+                    diff_new_with_whitelist.append(diff)
+                case ('- ', True):
+                    diff_new_with_whitelist.append('  ' + tag)
+                case ('+ ', False):
+                    pass
+                case ('+ ', True):
+                    diff_new_with_whitelist.append(diff)
+
+        diff_new = diff_new_with_whitelist
+
 
     diff_after = merge_diffs(diff_initial, diff_new)
 

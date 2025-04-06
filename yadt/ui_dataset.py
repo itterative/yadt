@@ -5,6 +5,9 @@ import zlib
 import pickle
 import hashlib
 import pathlib
+import duckdb
+import functools
+import huggingface_hub
 
 from injector import inject, singleton
 
@@ -40,6 +43,8 @@ class DatasetPage:
         self._settings_keep_tags_default = ''
         self._settings_ban_tags_default = ''
         self._settings_map_tags_default = ''
+        self._settings_whitelist_tags_defaults = ''
+        self._settings_whitelist_tag_group_defaults = ui_utils.NO_DROPDOWN_SELECTION
 
         self._settings_defaults = [
             self._settings_model_repo_default,
@@ -55,7 +60,19 @@ class DatasetPage:
             self._settings_keep_tags_default,
             self._settings_ban_tags_default,
             self._settings_map_tags_default,
+            self._settings_whitelist_tags_defaults,
+            self._settings_whitelist_tag_group_defaults,
         ]
+
+        try:
+            self._tag_groups_parquet = huggingface_hub.hf_hub_download(
+                'itterative/danbooru_wikis_full',
+                filename='tag_groups.parquet',
+                repo_type='dataset',
+                revision='5f697c8f1d2e54cbb9977ca4960ac588c6eeb57b',
+            )
+        except Exception as e:
+            raise AssertionError("Failed to download tag_groups.parquet from HuggingFace") from e
 
     def _temp_folder_gallery_path(self, name: str):        
         cache_folder = self._configuration.cache_folder / 'dataset_gallery'
@@ -70,6 +87,15 @@ class DatasetPage:
             with open(caption_file_path, 'w') as f:
                 f.write(caption)
 
+    def _load_caption_for_image_path(self, image_path: str):
+        caption_file_path = image_path[:image_path.rindex('.')] + '.txt'
+
+        if not os.path.exists(caption_file_path):
+            return None
+        
+        with open(caption_file_path, 'r') as f:
+            return f.read().strip()
+
     def _hash_file(self, path: str):
         with open(path, 'rb') as f:
             hash = hashlib.sha256(f.read())
@@ -80,6 +106,27 @@ class DatasetPage:
 
     def _decode_results(self, data: bytes):
         return pickle.loads(zlib.decompress(data))
+    
+    def _load_whitelist_tag_groups(self):
+        return list(map(lambda row: str(row[0]), duckdb.sql(f"select distinct tag_group from '{self._tag_groups_parquet}'").fetchall()))
+    
+    @functools.lru_cache()
+    def _process_whitelist_tag(self, whitelist_tags: str, whitelist_tag_group: str, replace_underscores: bool):
+        if whitelist_tags is None:
+            whitelist_tags = ''
+
+        tags = list(map(lambda tag: tag.strip(), whitelist_tags.split(',')))
+
+        if whitelist_tag_group != ui_utils.NO_DROPDOWN_SELECTION:
+            tags.extend(list(map(lambda row: row[0], duckdb.sql(f"select distinct tag from '{self._tag_groups_parquet}' where tag_group = ?", params=(whitelist_tag_group,)).fetchall())))
+
+        if len(tags) == 0:
+            return None
+
+        if replace_underscores:
+            tags = list(map(lambda t: t.replace('_', ' '), tags))
+
+        return tags
 
     def _process_dataset_folder(
             self,
@@ -97,6 +144,8 @@ class DatasetPage:
             keep_tags: str,
             ban_tags: str,
             map_tags: str,
+            whitelist_tags: str,
+            whitelist_tag_group: str,
             progress: gr.Progress,
     ):
         assert len(folder) > 0, "No folder given"
@@ -145,14 +194,13 @@ class DatasetPage:
             manual_edit = self._db.get_dataset_edit(folder, file_hash)
             if manual_edit is not None:
                 previous_edit, new_edit = manual_edit
-                sorted_general_strings_post = process_prediction.post_process_manual_edits(previous_edit, new_edit, sorted_general_strings)
+                sorted_general_strings_post = process_prediction.post_process_manual_edits(previous_edit, new_edit, sorted_general_strings, whitelist=self._process_whitelist_tag(whitelist_tags, whitelist_tag_group, replace_underscores))
+            elif existing_caption := self._load_caption_for_image_path(str(image_path)):
+                sorted_general_strings_post = process_prediction.post_process_manual_edits(existing_caption, existing_caption, sorted_general_strings, whitelist=self._process_whitelist_tag(whitelist_tags, whitelist_tag_group, replace_underscores))
+                sorted_general_strings = existing_caption
             else:
                 sorted_general_strings_post = sorted_general_strings
-            
-            # print('===', file)
-            # print(sorted_general_strings)
-            # print('')
-            
+
             all_count += 1
 
             temp_image_path = self._temp_folder_gallery_path(file_hash_hex)
@@ -201,6 +249,8 @@ class DatasetPage:
         keep_tags = str(self._db.get_dataset_setting(folder, 'keep_tags', default=self._settings_keep_tags_default))
         ban_tags = str(self._db.get_dataset_setting(folder, 'ban_tags', default=self._settings_ban_tags_default))
         map_tags = str(self._db.get_dataset_setting(folder, 'map_tags', default=self._settings_map_tags_default))
+        whitelist_tags = str(self._db.get_dataset_setting(folder, 'whitelist_tags', default=self._settings_whitelist_tags_defaults))
+        whitelist_tag_group = str(self._db.get_dataset_setting(folder, 'whitelist_tag_group', default=self._settings_whitelist_tag_group_defaults))
 
         return [
             model_repo,
@@ -216,6 +266,8 @@ class DatasetPage:
             keep_tags,
             ban_tags,
             map_tags,
+            whitelist_tags,
+            whitelist_tag_group,
         ]
 
     def _save_dataset_settings(
@@ -234,6 +286,8 @@ class DatasetPage:
             keep_tags: str,
             ban_tags: str,
             map_tags: str,
+            whitelist_tags: str,
+            whitelist_tag_group: str,
     ):
         self._db.set_dataset_setting(folder, 'model_repo', str(model_repo))
         self._db.set_dataset_setting(folder, 'general_thresh', str(general_thresh))
@@ -248,6 +302,8 @@ class DatasetPage:
         self._db.set_dataset_setting(folder, 'keep_tags', str(keep_tags))
         self._db.set_dataset_setting(folder, 'ban_tags', str(ban_tags))
         self._db.set_dataset_setting(folder, 'map_tags', str(map_tags))
+        self._db.set_dataset_setting(folder, 'whitelist_tags', str(whitelist_tags))
+        self._db.set_dataset_setting(folder, 'whitelist_tag_group', str(whitelist_tag_group))
 
 
     def ui(self):
@@ -318,14 +374,22 @@ class DatasetPage:
                         ban_tags = gr.Textbox(label="Ban tags:", placeholder="tag1, tag2, ...")
                         map_tags = gr.Textbox(label="Map tags", placeholder="one or more lines of \"tag1, tag2, ... : tag\"", lines=5, max_lines=100)
 
+                        with gr.Row():
+                            whitelist_tags = gr.Textbox(label="Whitelist tags:", value='', placeholder="tag1, tag2, ...")
+                            whitelist_tag_groups = gr.Dropdown(label="Whitelist tag groups:", value=ui_utils.NO_DROPDOWN_SELECTION, choices=[ui_utils.NO_DROPDOWN_SELECTION] + self._load_whitelist_tag_groups(), interactive=True)
+
                         gr.HTML('''
-                            <p>Prefixing tags</p>
+                            <p>Keeping tags</p>
                             <p><i>Adding any tags to this will sort the tags and add them before a "BREAK" tag.</i></p>
                             <br>
                             <p>Mapping tags</p>
                             <p><i>You can map certain one or more tags to different tags. Examples: </i></p>
                             <p style="padding-left: 1em"><i>* BAD_TAG : GOOD_TAG</i></p>
                             <p style="padding-left: 1em"><i>* 2girl : 2girls, GIRL_ONE, GIRL_TWO</i></p>
+                            <br>
+                            <p>Whitelisting tags</p>
+                            <p><i>If you want to add only certain tags or tag groups to your results, you can use this option.</i></p>
+                            <p><i>You can check what tags are whitelisted in the tag groups by searching through the wiki.</i></p>
                         ''')
                     
                     with gr.Row():
@@ -586,6 +650,8 @@ class DatasetPage:
                 keep_tags,
                 ban_tags,
                 map_tags,
+                whitelist_tags,
+                whitelist_tag_groups,
             ],
         )
         def _load_recent_datasets():
@@ -615,6 +681,8 @@ class DatasetPage:
                 keep_tags,
                 ban_tags,
                 map_tags,
+                whitelist_tags,
+                whitelist_tag_groups,
             ],
         )
         def _load_dataset_settings(folder: str):
@@ -640,6 +708,8 @@ class DatasetPage:
                 keep_tags,
                 ban_tags,
                 map_tags,
+                whitelist_tags,
+                whitelist_tag_groups,
             ],
             outputs=[
                 folder,
@@ -665,6 +735,8 @@ class DatasetPage:
                 keep_tags: str,
                 ban_tags: str,
                 map_tags: str,
+                whitelist_tags: str,
+                whitelist_tag_groups: str,
                 progress = gr.Progress(),
         ):
             with ui_utils.gradio_warning():
@@ -683,6 +755,8 @@ class DatasetPage:
                     keep_tags,
                     ban_tags,
                     map_tags,
+                    whitelist_tags,
+                    whitelist_tag_groups,
                     progress,
                 )
 
@@ -714,6 +788,8 @@ class DatasetPage:
                 keep_tags,
                 ban_tags,
                 map_tags,
+                whitelist_tags,
+                whitelist_tag_groups,
             ],
         )
         def _save_dataset_settings(*args):
