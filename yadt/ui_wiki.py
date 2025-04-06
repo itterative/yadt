@@ -17,6 +17,7 @@ from yadt.ui_shared import SharedState
 
 N_RESULTS = 20
 SELECTION_REGEX = re.compile('(.+?) \\(.+\\)')
+TITLE_TERMS_REGEX = re.compile('".+?"')
 
 @singleton
 class WikiPage:
@@ -56,6 +57,20 @@ class WikiPage:
     def _query_wiki(self, search: str):
         assert self._db.path.exists(), "Wiki database is not built"
         assert search is not None, "no search term"
+
+        title_terms = []
+        for term in re.findall(TITLE_TERMS_REGEX, search):
+            title_terms.append(term[1:-1])
+
+        for term in title_terms:
+            search = search.replace(f'"{term}"', '')
+        search = search.strip()
+
+        if len(title_terms) > 0:
+            if len(search) > 0:
+                return self._db.query_wiki_with_title_terms(search, title_terms, limit=N_RESULTS)
+
+            return self._db.query_title(title_terms, limit=N_RESULTS)
 
         return self._db.query_wiki(search, limit=N_RESULTS)
 
@@ -99,6 +114,16 @@ class WikiPage:
                 with gr.Column(scale=1):
                     with gr.Column(scale=0):
                         search_box = gr.Textbox(label="Search tag", placeholder="Type in a booru tag to search through the wiki")
+
+                        with gr.Column(variant="panel", scale=0) as wiki_info_section:
+                            gr.HTML('''
+                                <p><i>You can search for different terms, both in the wiki title and as well as the wiki page text.</i></p>
+                                <p><i>If you want a to search for specific terms in the tag (or wiki title), you can use quotes.</i></p>
+                                <p><i>Examples:</i></p>
+                                <p style="padding-left: 1em"><i>* "frieren"</i></p>
+                                <p style="padding-left: 1em"><i>* frieren "meme"</i></p>
+                                <p style="padding-left: 1em"><i>* monster "girl"</i></p>
+                            ''')
 
                         results_title = gr.HTML('<h3>Results</h3>')
 
@@ -177,9 +202,9 @@ class WikiPage:
                 for progress, update in self._download_and_build_wiki():
                     gr.Info(update, duration=2)
 
-                return gr.update(visible=False) + [_load_some_results()]
+                return [gr.update(visible=False)] + [_load_some_results()]
 
-            return gr.update(visible=True) + [[]]
+            return [gr.update(visible=True)] + [[]]
 
         @gr.on(
             search_box.submit,
