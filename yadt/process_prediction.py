@@ -364,9 +364,9 @@ def post_process_manual_edits(
         
         return merged
     
-    initial_tags = [tag.strip() for tag in initial_tags.split(',')]
-    edited_tags = [tag.strip() for tag in edited_tags.split(',')]
-    new_tags = [tag.strip() for tag in new_tags.split(',')]
+    initial_tags = list(filter(lambda tag: len(tag) > 0, [tag.strip() for tag in initial_tags.split(',')]))
+    edited_tags = list(filter(lambda tag: len(tag) > 0, [tag.strip() for tag in edited_tags.split(',')]))
+    new_tags = list(filter(lambda tag: len(tag) > 0, [tag.strip() for tag in new_tags.split(',')]))
 
     diff_initial = list(difflib.ndiff(initial_tags, edited_tags))
     diff_new = list(difflib.ndiff(initial_tags, new_tags))

@@ -111,9 +111,11 @@ class DatasetPage:
         return list(map(lambda row: str(row[0]), duckdb.sql(f"select distinct tag_group from '{self._tag_groups_parquet}'").fetchall()))
     
     @functools.lru_cache()
-    def _process_whitelist_tag(self, whitelist_tags: str, whitelist_tag_group: str, replace_underscores: bool):
-        if whitelist_tags is None:
+    def _process_whitelist_tag(self, whitelist_tag_group: str, *whitelist_tags: str, replace_underscores: bool = False):
+        if len(whitelist_tags) == 0:
             whitelist_tags = ''
+        else:
+            whitelist_tags = ', '.join(whitelist_tags)
 
         tags = list(map(lambda tag: tag.strip(), whitelist_tags.split(',')))
 
@@ -194,12 +196,23 @@ class DatasetPage:
             manual_edit = self._db.get_dataset_edit(folder, file_hash)
             if manual_edit is not None:
                 previous_edit, new_edit = manual_edit
-                sorted_general_strings_post = process_prediction.post_process_manual_edits(previous_edit, new_edit, sorted_general_strings, whitelist=self._process_whitelist_tag(whitelist_tags, whitelist_tag_group, replace_underscores))
+                
+                sorted_general_strings_post = process_prediction.post_process_manual_edits(
+                    previous_edit, new_edit, sorted_general_strings,
+                    whitelist=self._process_whitelist_tag(whitelist_tag_group, whitelist_tags, 'BREAK', prefix_tags, keep_tags, replace_underscores=replace_underscores)
+                )
             elif existing_caption := self._load_caption_for_image_path(str(image_path)):
-                sorted_general_strings_post = process_prediction.post_process_manual_edits(existing_caption, existing_caption, sorted_general_strings, whitelist=self._process_whitelist_tag(whitelist_tags, whitelist_tag_group, replace_underscores))
+                sorted_general_strings_post = process_prediction.post_process_manual_edits(
+                    existing_caption, existing_caption, sorted_general_strings,
+                    whitelist=self._process_whitelist_tag(whitelist_tag_group, whitelist_tags, 'BREAK', prefix_tags, keep_tags, replace_underscores=replace_underscores)
+                )
+                
                 sorted_general_strings = existing_caption
             else:
-                sorted_general_strings_post = sorted_general_strings
+                sorted_general_strings_post = process_prediction.post_process_manual_edits(
+                    '', '', sorted_general_strings,
+                    whitelist=self._process_whitelist_tag(whitelist_tag_group, whitelist_tags, 'BREAK', prefix_tags, keep_tags, replace_underscores=replace_underscores)
+                )
 
             all_count += 1
 
