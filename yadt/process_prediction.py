@@ -148,7 +148,7 @@ def post_process_prediction(
         return tags_new
 
     def _prefix_tokens(tags: List[Tuple[str, float]]):
-        if prefix_tags is None:
+        if prefix_tags is None or len(prefix_tags) == 0:
             return tags
         
         tags_new: List[Tuple[str, float]] = []
@@ -164,7 +164,7 @@ def post_process_prediction(
         return tags_new
 
     def _keep_tokens(tags: List[Tuple[str, float]]):
-        if keep_tags is None:
+        if keep_tags is None or len(keep_tags) == 0:
             return tags
 
         tags_new: List[Tuple[str, float]] = []
@@ -183,7 +183,7 @@ def post_process_prediction(
         return tags_new
 
     def _ban_tokens(tags: List[Tuple[str, float]]):
-        if ban_tags is None:
+        if ban_tags is None or len(ban_tags) == 0:
             return tags
         
         tags_new: List[Tuple[str, float]] = []
@@ -201,7 +201,7 @@ def post_process_prediction(
 
 
     def _map_tokens(tags: List[Tuple[str, float]]):
-        if map_tags is None:
+        if map_tags is None or len(map_tags) == 0:
             return tags
 
         import re
