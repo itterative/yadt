@@ -195,16 +195,16 @@ class WikiPage:
 
         @gr.on(
             build_wiki_button.click,
-            outputs=[wiki_load_section, results],
+            outputs=[build_wiki_button, wiki_load_section, results],
         )
         def _build_wiki():
             with ui_utils.gradio_warning():
                 for progress, update in self._download_and_build_wiki():
-                    gr.Info(update, duration=2)
+                    yield [gr.update(value=update), gr.update(visible=True)] + [[]]
 
-                return [gr.update(visible=False)] + [_load_some_results()]
+                yield [gr.update(value='Done'), gr.update(visible=False)] + [_load_some_results()]
 
-            return [gr.update(visible=True)] + [[]]
+            yield [gr.update(value='Download & build'), gr.update(visible=True)] + [[]]
 
         @gr.on(
             search_box.submit,
