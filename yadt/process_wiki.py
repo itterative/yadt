@@ -1,3 +1,4 @@
+import tqdm
 import typing
 import traceback
 
@@ -25,22 +26,16 @@ def process_wiki(connection: duckdb.DuckDBPyConnection):
 
         return _apply_regex
 
-    def apply_regex_sub(pattern: str, **kwargs):
+    def apply_regex_sub(pattern: str, re_flags = 0, **kwargs):
         regex = re.compile(pattern)
 
         def _apply_regex(fn):
             def _wrapper(text: str) -> str:
-                return re.sub(regex, lambda m: fn(*m.groups(), **kwargs), text)
+                return re.sub(regex, lambda m: fn(*m.groups(), **kwargs), text, flags=re_flags)
 
             return _wrapper
 
         return _apply_regex
-
-    def apply_to_lines(fn):
-        def _apply_to_lines(text: str):
-            return '\n'.join([ fn(line) for line in text.splitlines() ])
-
-        return _apply_to_lines
 
 
     @dataclasses.dataclass
@@ -77,16 +72,20 @@ def process_wiki(connection: duckdb.DuckDBPyConnection):
 
         tags = dtext_tags + dtext_tags_with_attr
 
+        re_separators_first = separators[0] if separators[0] != '[' else f'\\{separators[0]}'
+        re_separators_second = separators[1] if separators[1] != ']' else f'\\{separators[1]}'
+        dtext_split_re = re.compile('(' + '|'.join(map(lambda tag: f'{re_separators_first}{tag}{re_separators_second}|{re_separators_first}/{tag}{re_separators_second}', tags)) + ')')
+
         start_separator, end_separator = separators
         start_tags = [ f'{start_separator}{tag}{end_separator}' for tag in tags ]
         end_tags = [ f'{start_separator}{end_char}{tag}{end_separator}' for tag in tags ]
 
         def _start_tag(buf: str, lookahead: str):
-            if buf[-1] != separators[1]:
+            if len(buf) == 0 or buf[-1] != separators[1]:
                 return None
             
             # fix: special case where there are links that look like tags
-            if lookahead == '(':
+            if lookahead == '(' or lookahead == ']':
                 return None
 
             try:
@@ -110,7 +109,7 @@ def process_wiki(connection: duckdb.DuckDBPyConnection):
             return None
         
         def _end_tag(buf: str):
-            if buf[-1] != separators[1]:
+            if len(buf) == 0 or buf[-1] != separators[1]:
                 return None
 
             buf = buf.lower()
@@ -170,9 +169,10 @@ def process_wiki(connection: duckdb.DuckDBPyConnection):
                 pos = root
                 string_buf = ''
 
-                i = 0
-                for i, char in enumerate(text):
+                i = -1 # start at -1 to make it point to last character in the buffer
+                for char in re.split(dtext_split_re, text):
                     string_buf = string_buf + char
+                    i += len(char)
 
                     if char == '\n':
                         # fix: some tags aren't closed
@@ -306,9 +306,9 @@ def process_wiki(connection: duckdb.DuckDBPyConnection):
                 case 'tr':
                     return '<tr>\n' + '\n'.join(map(_format_table, node.children)) + '\n</tr>'
                 case 'th':
-                    return '<th>' + ''.join(map(_format_dtext_simple, node.children)) + '</th>'
+                    return '<th>\n' + ''.join(map(_format_dtext_simple, node.children)) + '\n</th>'
                 case 'td':
-                    return '<td>' + ''.join(map(_format_dtext_simple, node.children)) + '</td>'
+                    return '<td>\n' + ''.join(map(_format_dtext_simple, node.children)) + '\n</td>'
                 case _:
                     raise AssertionError(f'unsupported table dtext: {node.tag}')
 
@@ -378,18 +378,15 @@ def process_wiki(connection: duckdb.DuckDBPyConnection):
         return ''.join(map(_format_dtext, node.children))
     
 
-    @apply_to_lines
-    @apply_regex('h([0-9]).(.+)')
+    @apply_regex_sub('h([0-9]).(.+)')
     def parse_heading(heading_type: str, rest: str):
         return '#' * int(heading_type) + ' ' + rest.strip()
 
-    @apply_to_lines
-    @apply_regex('([*]+)\\w*(.+)')
+    @apply_regex_sub('([*]+)\\w*(.+)')
     def parse_list_items(quotes: str, text: str):
         return f'{"  " * (len(quotes)-1)}* {text}'
 
 
-    @apply_to_lines
     @apply_regex_sub('([a-zA-Z0-9]*)\\[\\[(.+?)\\]\\]([a-zA-Z0-9]*)', links_qualifier = re.compile('\\(.+\\)'))
     def parse_links(left: str, contents: str, right: str, links_qualifier: re.Pattern = None):
         parts = contents.split('|', 1)
@@ -409,45 +406,38 @@ def process_wiki(connection: duckdb.DuckDBPyConnection):
 
         if len(parts) == 1:
             contents = contents.strip()
-            return f'[{left}{contents}{right}](https://danbooru.donmai.us/wiki_pages/{contents.lower().replace(" ", "_")}){anchor}'
+            return f'<a href="https://danbooru.donmai.us/wiki_pages/{contents.lower().replace(" ", "_")}{anchor}">{left}{contents}{right}</a>'
         elif parts[1] == '':
             no_qualifier = re.sub(links_qualifier, '', parts[0]).strip()
-            return f'[{left}{no_qualifier}{right}](https://danbooru.donmai.us/wiki_pages/{parts[0].strip().lower().replace(" ", "_")}){anchor}'
+            return f'<a href="https://danbooru.donmai.us/wiki_pages/{parts[0].strip().lower().replace(" ", "_")}{anchor}">{left}{no_qualifier}{right}</a>'
         else:
-            return f'[{left}{parts[1].strip()}{right}](https://danbooru.donmai.us/wiki_pages/{parts[0].strip().lower().replace(" ", "_")}){anchor}'
+            return f'<a href="https://danbooru.donmai.us/wiki_pages/{parts[0].strip().lower().replace(" ", "_")}{anchor}">{left}{parts[1].strip()}{right}</a>'
 
-    @apply_to_lines
     @apply_regex_sub('"(.+?)":\\[(.+?)\\]')
     def parse_links_alt(title: str, url: str):
-        return f'[{title}]({url})'
+        return f'<a href="{url}">{title}</a>'
 
-    @apply_to_lines
     @apply_regex_sub('"(.+?)":([^ ]+)')
     def parse_links_alt2(title: str, url: str):
-        return f'[{title}]({url})'
+        return f'<a href="{url}">{title}</a>'
 
-    @apply_to_lines
     @apply_regex_sub('\\[(.+?)\\]\\((?!http)([^\\)]+)\\)')
     def parse_links_alt_md_reversed(url: str, title: str):
-        return f'[{title}]({url})'
+        return f'<a href="{url}">{title}</a>'
 
-    @apply_to_lines
     @apply_regex_sub('<a href="(.+?)">(.+?)</a>')
     def parse_links_alt_html(url: str, title: str):
-        return f'[{title}]({url})'
+        return f'<a href="{url}">{title}</a>'
 
-    @apply_to_lines
     @apply_regex_sub('<(http.+?)>')
     def parse_links_alt_htmlish(url: str):
-        return f'[{url}]({url})'
+        return f'<a href="{url}">{url}</a>'
 
 
-    @apply_to_lines
     @apply_regex_sub('\\[br\\]')
     def parse_breaks():
         return '\n'
 
-    @apply_to_lines
     @apply_regex_sub('\\[hr\\]')
     def parse_breakslines():
         return '-------'
@@ -477,7 +467,7 @@ def process_wiki(connection: duckdb.DuckDBPyConnection):
         dtext = parse_links_alt(dtext)
         dtext = parse_links_alt2(dtext)
         dtext = parse_links_alt_md_reversed(dtext)
-        dtext = parse_links_alt_html(dtext)
+        # dtext = parse_links_alt_html(dtext)
         dtext = parse_links_alt_htmlish(dtext)
 
         dtext = parse_dtext_html_style(dtext, raw_text=raw_text)
@@ -523,7 +513,7 @@ def process_wiki(connection: duckdb.DuckDBPyConnection):
     wiki_page_count = int(connection.sql('select count() from wiki_csv').fetchone()[0])
     wiki_page_batch_size = int(wiki_page_count * 0.5) // 100
 
-    for offset in range(0, wiki_page_count, wiki_page_batch_size):
+    for offset in tqdm.tqdm(range(0, wiki_page_count, wiki_page_batch_size), desc='parsing wiki pages'):
         # gradio tends to timeout when ingesting too much at a time
         # (likely cause duckdb holds the GIL somehow)
 
@@ -539,7 +529,7 @@ def process_wiki(connection: duckdb.DuckDBPyConnection):
                 from (select * from wiki_csv limit ? offset ?) wiki_csv left join tags_csv on wiki_csv.title = tags_csv.name
         """, parameters=(wiki_page_batch_size, offset))
 
-        yield 0.33, f"Ingesting wiki data: {(offset+wiki_page_batch_size)*100/wiki_page_count:.2f}%"
+        yield 0.33, f"Ingesting wiki data: {(min(wiki_page_count, offset+wiki_page_batch_size))*100/wiki_page_count:.2f}%"
 
     yield 0.75, 'Creating wiki index'
 
