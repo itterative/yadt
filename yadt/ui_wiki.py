@@ -138,7 +138,7 @@ class WikiPage:
                         gr.HTML('''
                             <p>In order for the wiki to work, it needs to grab several files from Huggingface and build the local wiki database.</p>
                             <p><i>At the moment, the local wiki database is missing. Please click on the button below in order to start downloading and building the local wiki copy.</i></p>
-                            <p><i>Building the wiki database takes 1-3 minutes and consumes up to 1GB of RAM.</i></p>
+                            <p><i>Building the wiki database takes 1-2 minutes and consumes up to 2GB of RAM.</i></p>
                         ''')
 
                         build_wiki_button = gr.Button('Download & build', interactive=not self._is_building_wiki)
