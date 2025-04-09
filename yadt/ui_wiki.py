@@ -209,6 +209,7 @@ class WikiPage:
                     yield [gr.update(value=update), gr.update(visible=True)] + [[]]
 
                 yield [gr.update(value='Done'), gr.update(visible=False)] + [_load_some_results()]
+                return
 
             yield [gr.update(value='Download & build'), gr.update(visible=True)] + [[]]
 
