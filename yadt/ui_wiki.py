@@ -18,6 +18,7 @@ from yadt.ui_shared import SharedState
 N_RESULTS = 20
 SELECTION_REGEX = re.compile('(.+?) \\(.+\\)')
 TITLE_TERMS_REGEX = re.compile('".+?"')
+TITLE_TERMS_SPLIT_REGEX = re.compile('[^a-z0-9]+')
 
 @singleton
 class WikiPage:
@@ -60,17 +61,22 @@ class WikiPage:
 
         title_terms = []
         for term in re.findall(TITLE_TERMS_REGEX, search):
-            title_terms.append(term[1:-1])
+            title_terms.append(term)
 
         for term in title_terms:
-            search = search.replace(f'"{term}"', '')
+            search = search.replace(term, '')
         search = search.strip()
 
-        if len(title_terms) > 0:
-            if len(search) > 0:
-                return self._db.query_wiki_with_title_terms(search, title_terms, limit=N_RESULTS)
+        title_terms_second_pass = []
+        for term in title_terms:
+            title_terms_second_pass.extend(re.split(TITLE_TERMS_SPLIT_REGEX, term))
+        title_terms_second_pass = list(filter(lambda term: len(term) > 0, title_terms_second_pass))
 
-            return self._db.query_title(title_terms, limit=N_RESULTS)
+        if len(title_terms_second_pass) > 0:
+            if len(search) > 0:
+                return self._db.query_wiki_with_title_terms(search, title_terms_second_pass, limit=N_RESULTS)
+
+            return self._db.query_title(title_terms_second_pass, limit=N_RESULTS)
 
         return self._db.query_wiki(search, limit=N_RESULTS)
 
