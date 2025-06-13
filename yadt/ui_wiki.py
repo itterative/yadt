@@ -250,13 +250,13 @@ class WikiPage:
         )
         def _load_wiki(previous_title: str, previous_markdown: str, selection: list[str]):
             with ui_utils.gradio_warning():
-                selection = self._load_wiki_reference(selection)
+                selection: str = self._load_wiki_reference(selection)
                 markdown = self._load_wiki(selection)
 
                 if len(markdown) == 0:
                     markdown = '*Either the tag has no wiki page or the page is empty.*'
 
-                return [f'<h3>{selection}</h3>', markdown]
+                return [f'<h3>{selection.replace("_", " ")}</h3>', markdown]
             
             return [ previous_title, previous_markdown ]
 
