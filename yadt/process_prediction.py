@@ -337,8 +337,8 @@ def post_process_manual_edits(
                     merged.append(c_initial)
                     i_initial += 1
                 case (False, '+ ', '+ '):
-                    merged.append(c_initial)
-                    i_initial += 1
+                    merged.append(c_new)
+                    i_new += 1
                 case (False, '+ ', '- '):
                     merged.append(c_new)
                     merged.append(c_initial)

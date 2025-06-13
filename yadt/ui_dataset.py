@@ -39,6 +39,7 @@ class DatasetPage:
         self._settings_trim_general_tag_dupes_default = 'True'
         self._settings_escape_brackets_default = 'False'
         self._settings_overwrite_current_caption_default = 'False'
+        self._settings_merge_existing_captions_default = 'False'
         self._settings_prefix_tags_default = ''
         self._settings_keep_tags_default = ''
         self._settings_ban_tags_default = ''
@@ -56,6 +57,7 @@ class DatasetPage:
             self._settings_trim_general_tag_dupes_default,
             self._settings_escape_brackets_default,
             self._settings_overwrite_current_caption_default,
+            self._settings_merge_existing_captions_default,
             self._settings_prefix_tags_default,
             self._settings_keep_tags_default,
             self._settings_ban_tags_default,
@@ -132,6 +134,43 @@ class DatasetPage:
             tags = list(map(lambda t: t.replace('_', ' '), tags))
 
         return tags
+    
+    def _load_dataset_folder(
+            self,
+            folder: str,
+            progress: gr.Progress,
+    ):
+        assert len(folder) > 0, "No folder given"
+        assert os.path.isdir(folder), "Folder either doesn't exist or is not a folder"
+
+        files = os.listdir(folder)
+        files = list(filter(lambda f: not f.endswith('.txt') and not f.endswith('.npz') and not f.endswith('.json'), files))
+
+        all_images = []
+
+        for index, file in progress.tqdm(list(enumerate(files)), desc=folder):
+            image_path = str(pathlib.Path(folder) / file)
+
+            file_hash = self._hash_file(image_path)
+            file_hash_hex = file_hash.hex()
+
+            try:
+                image = Image.open(image_path)
+            except Exception as e:
+                continue
+
+            temp_image_path = self._temp_folder_gallery_path(file_hash_hex)
+            if not os.path.exists(temp_image_path):
+                image.convert("RGB").save(temp_image_path, quality=75, optimize=True)
+
+            existing_caption = self._load_caption_for_image_path(str(image_path))
+            if existing_caption is None:
+                existing_caption = ''
+
+            all_images.append((file_hash_hex, [image_path, existing_caption, existing_caption]))
+
+        return all_images
+
 
     def _process_dataset_folder(
             self,
@@ -145,6 +184,7 @@ class DatasetPage:
             trim_general_tag_dupes: bool,
             escape_brackets: bool,
             overwrite_current_caption: bool,
+            merge_existing_captions: bool,
             prefix_tags: str,
             keep_tags: str,
             ban_tags: str,
@@ -201,19 +241,30 @@ class DatasetPage:
                 )
             
             manual_edit = self._db.get_dataset_edit(folder, file_hash)
-            if manual_edit is not None:
+
+            if merge_existing_captions and manual_edit is not None:
                 previous_edit, new_edit = manual_edit
-                
+
+                existing_caption = self._load_caption_for_image_path(str(image_path))
+
+                # file was changed
+                if existing_caption is not None and new_edit != existing_caption:
+                    previous_edit = sorted_general_strings
+                    new_edit = existing_caption
+
+                    self._db.set_dataset_edit(folder, file_hash, previous_edit, new_edit)
+
                 sorted_general_strings_post = process_prediction.post_process_manual_edits(
                     previous_edit, new_edit, sorted_general_strings,
                     whitelist=self._process_whitelist_tag(whitelist_tag_group, whitelist_tags, 'BREAK', prefix_tags, keep_tags, replace_underscores=replace_underscores, skip=skip_whitelist)
                 )
-            elif existing_caption := self._load_caption_for_image_path(str(image_path)):
+            elif merge_existing_captions and (existing_caption := self._load_caption_for_image_path(str(image_path))):
                 sorted_general_strings_post = process_prediction.post_process_manual_edits(
-                    existing_caption, existing_caption, sorted_general_strings,
+                    sorted_general_strings, existing_caption, sorted_general_strings,
                     whitelist=self._process_whitelist_tag(whitelist_tag_group, whitelist_tags, 'BREAK', prefix_tags, keep_tags, replace_underscores=replace_underscores, skip=skip_whitelist)
                 )
                 
+                self._db.set_dataset_edit(folder, file_hash, sorted_general_strings, existing_caption)
                 sorted_general_strings = existing_caption
             else:
                 sorted_general_strings_post = process_prediction.post_process_manual_edits(
@@ -265,6 +316,7 @@ class DatasetPage:
         trim_general_tag_dupes = (self._db.get_dataset_setting(folder, 'trim_general_tag_dupes', default=self._settings_trim_general_tag_dupes_default)) == 'True'
         escape_brackets = (self._db.get_dataset_setting(folder, 'escape_brackets', default=self._settings_escape_brackets_default)) == ''
         overwrite_current_caption = (self._db.get_dataset_setting(folder, 'overwrite_current_caption', default=self._settings_overwrite_current_caption_default)) == 'True'
+        merge_existing_captions = (self._db.get_dataset_setting(folder, 'merge_existing_captions', default=self._settings_merge_existing_captions_default)) == 'True'
         prefix_tags = str(self._db.get_dataset_setting(folder, 'prefix_tags', default=self._settings_prefix_tags_default))
         keep_tags = str(self._db.get_dataset_setting(folder, 'keep_tags', default=self._settings_keep_tags_default))
         ban_tags = str(self._db.get_dataset_setting(folder, 'ban_tags', default=self._settings_ban_tags_default))
@@ -282,6 +334,7 @@ class DatasetPage:
             trim_general_tag_dupes,
             escape_brackets,
             overwrite_current_caption,
+            merge_existing_captions,
             prefix_tags,
             keep_tags,
             ban_tags,
@@ -302,6 +355,7 @@ class DatasetPage:
             trim_general_tag_dupes: bool,
             escape_brackets: bool,
             overwrite_current_caption: bool,
+            merge_existing_captions: bool,
             prefix_tags: str,
             keep_tags: str,
             ban_tags: str,
@@ -318,6 +372,7 @@ class DatasetPage:
         self._db.set_dataset_setting(folder, 'trim_general_tag_dupes', str(trim_general_tag_dupes))
         self._db.set_dataset_setting(folder, 'escape_brackets', str(escape_brackets))
         self._db.set_dataset_setting(folder, 'overwrite_current_caption', str(overwrite_current_caption))
+        self._db.set_dataset_setting(folder, 'merge_existing_captions', str(merge_existing_captions))
         self._db.set_dataset_setting(folder, 'prefix_tags', str(prefix_tags))
         self._db.set_dataset_setting(folder, 'keep_tags', str(keep_tags))
         self._db.set_dataset_setting(folder, 'ban_tags', str(ban_tags))
@@ -366,29 +421,21 @@ class DatasetPage:
                             scale=3,
                         )
 
-                    with gr.Row():
+                    with gr.Row(variant='panel'):
                         overwrite_current_caption = gr.Checkbox(
                             value=False,
                             label="Overwrite existing captions",
                             scale=1,
+                            container=False,
                         )
-                        replace_underscores = gr.Checkbox(
-                            value=True,
-                            label="Replace underscores with spaces",
-                            scale=1,
-                        )
-                        trim_general_tag_dupes = gr.Checkbox(
-                            value=True,
-                            label="Trim duplicate general tags",
-                            scale=1,
-                        )
-                        escape_brackets = gr.Checkbox(
+                        merge_existing_captions = gr.Checkbox(
                             value=False,
-                            label="Escape brackets (for webui)",
+                            label="Merge existing captions",
                             scale=1,
+                            container=False,
                         )
 
-                    with gr.Column(variant='panel'):
+                    with gr.Column():
                         prefix_tags = gr.Textbox(label="Prefix tags:", placeholder="tag1, tag2, ...")
                         keep_tags = gr.Textbox(label="Keep tags:", placeholder="tag1, tag2, ...")
                         ban_tags = gr.Textbox(label="Ban tags:", placeholder="tag1, tag2, ...")
@@ -398,8 +445,28 @@ class DatasetPage:
                             whitelist_tags = gr.Textbox(label="Whitelist tags:", value='', placeholder="tag1, tag2, ...")
                             whitelist_tag_groups = gr.Dropdown(label="Whitelist tag groups:", value=ui_utils.NO_DROPDOWN_SELECTION, choices=[ui_utils.NO_DROPDOWN_SELECTION] + self._load_whitelist_tag_groups(), interactive=True)
 
+                        with gr.Row(variant='panel'):
+                            replace_underscores = gr.Checkbox(
+                                value=True,
+                                label="Replace underscores with spaces",
+                                scale=1,
+                                container=False,
+                            )
+                            trim_general_tag_dupes = gr.Checkbox(
+                                value=True,
+                                label="Trim duplicate general tags",
+                                scale=1,
+                                container=False,
+                            )
+                            escape_brackets = gr.Checkbox(
+                                value=False,
+                                label="Escape brackets (for webui)",
+                                scale=1,
+                                container=False,
+                            )
+
                         gr.HTML('''
-                            <p>Keeping tags</p>
+                            <p>Prefixing & keeping tags</p>
                             <p><i>Adding any tags to this will sort the tags and add them before a "BREAK" tag.</i></p>
                             <br>
                             <p>Mapping tags</p>
@@ -410,8 +477,14 @@ class DatasetPage:
                             <p>Whitelisting tags</p>
                             <p><i>If you want to add only certain tags or tag groups to your results, you can use this option.</i></p>
                             <p><i>You can check what tags are whitelisted in the tag groups by searching through the wiki.</i></p>
+                            <br>
+                            <p>Merging tags</p>
+                            <p><i>Merging dataset tags is still <b>experimental</b>. It is usually used in combination with tag group whitelisting.</i></p>
+                            <p><i>It's goal is to allow adding new tags or to keep the tagging model from adding any manually deleted tags when running it multiple times.</i></p>
+                            <p><i>This feature can give unexpected results, as there is not one way of merging tags. In the future, this might be extended in order to allow different kinds of merging strategies.</i></p>
+                            <p><i>Generally, it's advised to use the mapping tags feature instead of the merging tags if you want to get consistent results.</i></p>
                         ''')
-                    
+
                     with gr.Row():
                         clear = gr.ClearButton(
                             components=[
@@ -457,7 +530,6 @@ class DatasetPage:
                                 gallery_tags_save = gr.Button(value="Save", variant="primary")
 
                             gr.HTML('''
-                                <p>Editing dataset tags is still <i><b>experimental</b></i>.</p>
                                 <p style="font-size: 0.9em">
                                     <i>
                                         <b>Reset</b> will clear any changes made previously, and set the tags back to the original model tags (using the rules set on the left side). <br>
@@ -666,6 +738,7 @@ class DatasetPage:
                 trim_general_tag_dupes,
                 escape_brackets,
                 overwrite_current_caption,
+                merge_existing_captions,
                 prefix_tags,
                 keep_tags,
                 ban_tags,
@@ -697,6 +770,7 @@ class DatasetPage:
                 trim_general_tag_dupes,
                 escape_brackets,
                 overwrite_current_caption,
+                merge_existing_captions,
                 prefix_tags,
                 keep_tags,
                 ban_tags,
@@ -710,6 +784,28 @@ class DatasetPage:
                 return self._load_dataset_settings(folder)
             
             return self._settings_defaults
+        
+        @gr.on(
+            load_folder.click,
+            inputs=[folder],
+            outputs=[
+                folder,
+                gallery_cache,
+                gallery_tags_filter,
+                rating,
+                general_res,
+                character_res,
+            ],
+        )
+        def _load_dataset_folder(folder: str, progress = gr.Progress()):
+            return [
+                gr.Dropdown(choices=self._load_recent_datasets()),
+                self._load_dataset_folder(folder, progress),
+                gr.Column(visible=True),
+                {},
+                {},
+                {},
+            ]
 
         @gr.on(
             submit.click,
@@ -724,6 +820,7 @@ class DatasetPage:
                 trim_general_tag_dupes,
                 escape_brackets,
                 overwrite_current_caption,
+                merge_existing_captions,
                 prefix_tags,
                 keep_tags,
                 ban_tags,
@@ -751,6 +848,7 @@ class DatasetPage:
                 trim_general_tag_dupes: bool,
                 escape_brackets: bool,
                 overwrite_current_caption: bool,
+                merge_existing_captions: bool,
                 prefix_tags: str,
                 keep_tags: str,
                 ban_tags: str,
@@ -771,6 +869,7 @@ class DatasetPage:
                     trim_general_tag_dupes,
                     escape_brackets,
                     overwrite_current_caption,
+                    merge_existing_captions,
                     prefix_tags,
                     keep_tags,
                     ban_tags,
