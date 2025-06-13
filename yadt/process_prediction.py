@@ -205,11 +205,11 @@ def post_process_prediction(
             return tags
 
         import re
-        line_re = re.compile("^(\\s*|(.+):(.+))$")
+        line_re = re.compile("^(\\s*|(.+?) : (.+))$")
 
         assert all(map(lambda s: line_re.match(s) is not None, map_tags.splitlines())), "Map tokens is not valid: expected lines of format: token, token, ... : token"
 
-        map_tags_dict: Dict[str, List[str]] = {}
+        map_tags_list: List[Tuple[List[str], List[str]]] = []
 
         for line in map_tags.splitlines():
             _, tokens, to_token = line_re.match(line).groups()
@@ -221,46 +221,39 @@ def post_process_prediction(
             to_token = list(map(lambda t: t.strip(), to_token.split(',')))
 
             for token in tokens.split(','):
-                map_tags_dict[token.strip()] = to_token
+                token = token.strip()
+                token = list(map(lambda s: s.strip(), token.split('&')))
 
-        # print('map_tags_dict', map_tags_dict)
-
-        tags_old = list(tags)
+                map_tags_list.append((token, to_token))
 
         has_mapped_a_tag = True
         for _ in range(20):
             has_mapped_a_tag = False
 
             tags_new: List[Tuple[str, float]] = []
+            tags_to_remove = []
 
-            for tag, prob in tags_old:
-                mapped_tags = map_tags_dict.get(tag, None)
+            for mapping_tags, mapped_tags in map_tags_list:
+                mapping_tags_probs = list(map(lambda t: next(filter(lambda e_t: t == e_t[0], tags), ('', 0.0))[1], mapping_tags))
 
-                if mapped_tags is None:
-                    tags_new.append((tag, prob))
+                if not all(mapping_tags_probs):
                     continue
 
-                has_mapped_a_tag = has_mapped_a_tag or tag not in mapped_tags
+                has_mapped_a_tag = has_mapped_a_tag or not all(map(lambda t: t in mapped_tags, mapping_tags))
+                mapping_tags_max_prob = max(mapping_tags_probs)
 
-                for mapped_tag in mapped_tags:
-                    existing_tag = next(filter(lambda t: t[0] == mapped_tag, tags_new), None)
+                tags_new.extend(map(lambda t: (t, mapping_tags_max_prob), mapped_tags))
+                tags_to_remove.extend(mapping_tags)
 
-                    if existing_tag is not None:
-                        prob = max(prob, existing_tag[1])
-                        tags_new.remove(existing_tag)
-
-                    tags_new.append((mapped_tag, prob))
-                    # print('tags_new.append((mapped_tag, prob))', mapped_tag, prob)
-
-            tags_old = tags_new
+            tags = list(filter(lambda t: t[0] not in tags_to_remove, tags))
+            tags.extend(tags_new)
 
             if not has_mapped_a_tag:
                 break
         else:
             raise AssertionError('token mapping likely contains a recursion')
 
-        # print('map_tokens', tags_new)
-        return tags_new
+        return tags
 
 
     def _clean_ratings(items: List[Tuple[str, float]]):

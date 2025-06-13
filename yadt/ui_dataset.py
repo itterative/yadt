@@ -470,9 +470,13 @@ class DatasetPage:
                             <p><i>Adding any tags to this will sort the tags and add them before a "BREAK" tag.</i></p>
                             <br>
                             <p>Mapping tags</p>
-                            <p><i>You can map certain one or more tags to different tags. Examples: </i></p>
+                            <p><i>You can map certain one or more tags to different tags. Using '&' will only match if all tags are present.</p>
+                            <p><i>Examples: </i></p>
                             <p style="padding-left: 1em"><i>* BAD_TAG : GOOD_TAG</i></p>
+                            <p style="padding-left: 1em"><i>* BAD_TAG_ONE, BAD_TAG_TWO : GOOD_TAG</i></p>
                             <p style="padding-left: 1em"><i>* 2girl : 2girls, GIRL_ONE, GIRL_TWO</i></p>
+                            <p style="padding-left: 1em"><i>* 1girl & blue eyes : 1girl, GIRL_NAME, blue eyes</i></p>
+                            <p style="padding-left: 1em"><i>* 1girl & white eyes, 1girl & blue eyes : 1girl, GIRL_WITH_BLUE_EYES, blue eyes</i></p>
                             <br>
                             <p>Whitelisting tags</p>
                             <p><i>If you want to add only certain tags or tag groups to your results, you can use this option.</i></p>
