@@ -488,6 +488,7 @@ class DatasetPage:
                             <p><i>This feature can give unexpected results, as there is not one way of merging tags. In the future, this might be extended in order to allow different kinds of merging strategies.</i></p>
                             <p><i>Generally, it's advised to use the mapping tags feature instead of the merging tags if you want to get consistent results.</i></p>
                         ''')
+
                     with gr.Row():
                         clear = gr.ClearButton(
                             components=[
@@ -501,6 +502,7 @@ class DatasetPage:
                                 trim_general_tag_dupes,
                                 escape_brackets,
                                 overwrite_current_caption,
+                                merge_existing_captions,
                                 prefix_tags,
                                 keep_tags,
                                 ban_tags,
@@ -906,6 +908,7 @@ class DatasetPage:
                 trim_general_tag_dupes,
                 escape_brackets,
                 overwrite_current_caption,
+                merge_existing_captions,
                 prefix_tags,
                 keep_tags,
                 ban_tags,
