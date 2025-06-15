@@ -470,13 +470,13 @@ class DatasetPage:
                             <p><i>Adding any tags to this will sort the tags and add them before a "BREAK" tag.</i></p>
                             <br>
                             <p>Mapping tags</p>
-                            <p><i>You can map certain one or more tags to different tags. Using '&' will only match if all tags are present.</p>
+                            <p><i>You can map certain one or more tags to different tags. Using '&' will only match if all tags are present. If you want certain tags to not be matched, you can prepend '-' to them.</p>
                             <p><i>Examples: </i></p>
                             <p style="padding-left: 1em"><i>* BAD_TAG : GOOD_TAG</i></p>
                             <p style="padding-left: 1em"><i>* BAD_TAG_ONE, BAD_TAG_TWO : GOOD_TAG</i></p>
                             <p style="padding-left: 1em"><i>* 2girl : 2girls, GIRL_ONE, GIRL_TWO</i></p>
                             <p style="padding-left: 1em"><i>* 1girl & blue eyes : 1girl, GIRL_NAME, blue eyes</i></p>
-                            <p style="padding-left: 1em"><i>* 1girl & white eyes, 1girl & blue eyes : 1girl, GIRL_WITH_BLUE_EYES, blue eyes</i></p>
+                            <p style="padding-left: 1em"><i>* 1girl & white eyes & -blonde hair : 1girl, GIRL_WITH_WHITE_EYES_AND_NO_BLONDE_HAIR, white eyes</i></p>
                             <br>
                             <p>Whitelisting tags</p>
                             <p><i>If you want to add only certain tags or tag groups to your results, you can use this option.</i></p>
@@ -488,7 +488,6 @@ class DatasetPage:
                             <p><i>This feature can give unexpected results, as there is not one way of merging tags. In the future, this might be extended in order to allow different kinds of merging strategies.</i></p>
                             <p><i>Generally, it's advised to use the mapping tags feature instead of the merging tags if you want to get consistent results.</i></p>
                         ''')
-
                     with gr.Row():
                         clear = gr.ClearButton(
                             components=[

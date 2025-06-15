@@ -207,52 +207,83 @@ def post_process_prediction(
         import re
         line_re = re.compile("^(\\s*|(.+?) : (.+))$")
 
-        assert all(map(lambda s: line_re.match(s) is not None, map_tags.splitlines())), "Map tokens is not valid: expected lines of format: token, token, ... : token"
-
-        map_tags_list: List[Tuple[List[str], List[str]]] = []
+        map_tags_list: List[Tuple[List[str], Tuple[str, List[str]]]] = []
 
         for line in map_tags.splitlines():
-            _, tokens, to_token = line_re.match(line).groups()
+            if line.startswith('#') or not line.strip():
+                continue
+
+            line_match = line_re.match(line)
+            assert line_match is not None, "map tokens is not valid: expected lines of format: token, token, ... : token: {line}"
+
+            _, tokens, to_token = line_match.groups()
 
             if to_token is None:
                 continue
 
-            to_token = to_token.strip()
             to_token = list(map(lambda t: t.strip(), to_token.split(',')))
+            tokens = list(map(lambda t: t.strip(), tokens.split(',')))
 
-            for token in tokens.split(','):
+            for token in tokens:
                 token = token.strip()
-                token = list(map(lambda s: s.strip(), token.split('&')))
+                token = token.split('&')
+                token_clean = []
 
-                map_tags_list.append((token, to_token))
+                # special handling when the tag contains a "&"
+                c_token = None
+                for _token in token:
+                    if c_token is not None:
+                        if _token.rstrip().endswith('"'):
+                            c_token += '&'
+                            c_token += _token.rstrip()
+                            token_clean.append(c_token[1:-1])
+                            c_token = None
+                        else:
+                            c_token += '&'
+                            c_token += _token
+                    elif _token.lstrip().startswith('"'):
+                        if _token.rstrip().endswith('"'):
+                            token_clean.append(_token.strip()[1:-1])
+                        else:
+                            c_token = _token.lstrip()
+                    else:
+                        token_clean.append(_token.strip())
+
+                map_tags_list.append((token_clean, (line, to_token)))
+            
+            if c_token is not None:
+                raise AssertionError(f'token mapping contains an invalid condition: unclosed quote: {repr(line)}')
+
+
 
         has_mapped_a_tag = True
-        for _ in range(20):
+        for i in range(20):
             has_mapped_a_tag = False
 
-            tags_new: List[Tuple[str, float]] = []
-            tags_to_remove = []
+            for mapping_tags, (line, mapped_tags) in map_tags_list:
+                pos_mapping_tags = list(filter(lambda t: not t.startswith('-'), mapping_tags))
+                neg_mapping_tags = list(map(lambda t: t[1:], filter(lambda t: t.startswith('-'), mapping_tags)))
 
-            for mapping_tags, mapped_tags in map_tags_list:
-                mapping_tags_probs = list(map(lambda t: next(filter(lambda e_t: t == e_t[0], tags), ('', 0.0))[1], mapping_tags))
+                if len(pos_mapping_tags) == 0:
+                    raise AssertionError(f'token mapping condition must contain at least one positive tag: {repr(line)}')
 
-                if not all(mapping_tags_probs):
+                pos_mapping_tags_probs = list(map(lambda t: next(filter(lambda e_t: t == e_t[0], tags), ('', 0.0))[1], pos_mapping_tags))
+                neg_mapping_tags_probs = list(map(lambda t: next(filter(lambda e_t: t == e_t[0], tags), ('', 0.0))[1], neg_mapping_tags))
+
+                if not all(pos_mapping_tags_probs) or any(neg_mapping_tags_probs):
                     continue
 
-                has_mapped_a_tag = has_mapped_a_tag or not all(map(lambda t: t in mapped_tags, mapping_tags))
-                mapping_tags_max_prob = max(mapping_tags_probs)
+                has_mapped_a_tag = has_mapped_a_tag or not all(map(lambda t: t in mapped_tags, pos_mapping_tags))
+                mapping_tags_max_prob = max(pos_mapping_tags_probs)
 
-                tags_new.extend(map(lambda t: (t, mapping_tags_max_prob), mapped_tags))
-                tags_to_remove.extend(mapping_tags)
-
-            tags = list(filter(lambda t: t[0] not in tags_to_remove, tags))
-            tags.extend(tags_new)
+                tags = list(filter(lambda t: t[0] not in pos_mapping_tags, tags))
+                tags.extend(map(lambda t: (t, mapping_tags_max_prob), mapped_tags))
 
             if not has_mapped_a_tag:
                 break
         else:
             raise AssertionError('token mapping likely contains a recursion')
-
+        
         return tags
 
 
